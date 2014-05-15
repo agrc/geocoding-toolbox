@@ -1,0 +1,9 @@
+OBJID,INADDR,INZONE,MatchAddress,Zone,Score,XCoord,YCoord,Geocoder
+6,fasf,,Error: Address invalid or NULL fields,,,,,
+7,677 N SR 6,None,Error: Address invalid or NULL fields,,,,,
+1,259 W MAIN, Delta,259 W Main St, Delta,87.35,363818.037879,4357059.12341,Centerlines.StatewideRoads
+2,154 E MAIN, Delta,154 E Main St, Delta,87.35,364620.428491,4357039.03653,Centerlines.StatewideRoads
+3,39 N SR 6, Delta,39 N Highway 6, Delta,100.0,365289.69158,4357239.75445,Centerlines.StatewideRoads
+4,358 N SR 6, Delta,358 N Highway 6, Delta,100.0,365880.423922,4357740.98166,Centerlines.StatewideRoads
+5,677 N SR 6, Delta,677 N Highway 6, Delta,100.0,366440.560085,4358272.15185,Centerlines.StatewideRoads
+8,67 N SR 90, Town,Error: Address not found,,,,,
