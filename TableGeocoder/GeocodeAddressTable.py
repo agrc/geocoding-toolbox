@@ -1,5 +1,5 @@
 '''
-Created on Dec 13, 2013
+Script tool for ArcGIS which geocodes a table of addresses and produces a new table of the results.
 
 @author: kwalker
 '''
@@ -220,7 +220,6 @@ class TableGeocoder(object):
             for coderResult in matchAddresses:
                 
                 if "error" in coderResult:
-                    #print "Address not found"
                     #inputAddress is not in result sometimes for some reason?
                     #address not found error
                     if "inputAddress" not in coderResult and "id" in coderResult:
@@ -253,8 +252,6 @@ class TableGeocoder(object):
     def start(self):     
         resultList = []
         outputFullPath = os.path.join(self._outputDir, self._outputFileName)
-#         version = "2.1.0"
-#         arcpy.AddMessage("Geocode Table Version " + version)
         
         #Setup progress bar
         record_count = int(arcpy.GetCount_management(self._inputTable).getOutput(0))
@@ -306,10 +303,6 @@ class TableGeocoder(object):
                     matchAddresses = geocoder.locateAddresses(intermediateList, **{"spatialReference": self._spatialRef, "locators": self._locator})
                     self._ProcessIntermedaite(intermediateList, resultList, matchAddresses, outputFullPath)    
                     intermediateList = []
-                                                 
-        #print
-        #for r in resultList:
-            #print r 
        
         #Create dbf table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
         arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName), os.path.join(self._outputDir, self._outputFileName.replace(".csv", ".dbf")))
