@@ -11,7 +11,7 @@ ToolRunner.py
 
 ### Build and Install
 Build.py
-- Copies the AGRC Geocode Tools.tbx ArcGIS tool box, the tool box's dependencies and the install file to the project build directory.
+- Copies the AGRC Geocode Tools.tbx ArcGIS tool box, the tool box's dependencies and the install file to the project Install_Files directory.
 
 Install.py
 - Installs AGRC Geocode Tools.tbx dependencies to the site-packages directory for the python installation with which it was executed.

@@ -9,7 +9,7 @@ startTime = time.time()
 currentTime = time.time()
 
 srcDir = os.path.join(os.path.dirname(__file__), "TableGeocoder")
-dstDir = os.path.join(os.path.dirname(__file__), r"build\AGRC_GeocodingTools")
+dstDir = os.path.join(os.path.dirname(__file__), r"Install_Files\AGRC_GeocodingTools")
 
 if os.path.exists(dstDir):
     shutil.rmtree(dstDir)
