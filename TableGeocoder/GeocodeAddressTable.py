@@ -4,7 +4,7 @@ Script tool for ArcGIS which geocodes a table of addresses and produces a new ta
 @author: kwalker
 '''
 
-import urllib, urllib2, json, arcpy, os
+import urllib, urllib2, json, arcpy, os, time
 from operator import attrgetter
 
 
@@ -299,10 +299,33 @@ class TableGeocoder(object):
                         self._HandleCurrentResult(currentResult, resultList, outputFullPath)
                 
                 #Send addresses to geocoder in a group
-                if len(intermediateList) == 50 or (i == record_count):
+                if len(intermediateList) == 95 or (i == record_count):
+                    time.sleep(20)
                     matchAddresses = geocoder.locateAddresses(intermediateList, **{"spatialReference": self._spatialRef, "locators": self._locator})
                     self._ProcessIntermedaite(intermediateList, resultList, matchAddresses, outputFullPath)    
                     intermediateList = []
        
         #Create dbf table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
         arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName), os.path.join(self._outputDir, self._outputFileName.replace(".csv", ".dbf")))
+        
+        
+
+
+
+if __name__ == "__main__":
+    apiKey  = arcpy.GetParameterAsText(0)
+    inputTable = arcpy.GetParameterAsText(1)
+    idField = arcpy.GetParameterAsText(2)
+    addressField = arcpy.GetParameterAsText(3)
+    zoneField = arcpy.GetParameterAsText(4)
+    locator = TableGeocoder.locatorMap[str(arcpy.GetParameterAsText(5))]
+    spatialRef = TableGeocoder.spatialRefMap[str(arcpy.GetParameterAsText(6))]
+    outputDir = arcpy.GetParameterAsText(7)
+    outputFileName = "mapservGeocodeResults_" + time.strftime("%Y%m%d%H%M%S") + ".csv"
+    arcpy.SetParameterAsText(6, os.path.join(outputDir, outputFileName.replace(".csv", ".dbf")))
+    
+    version = "2.1.7"
+    arcpy.AddMessage("Geocode Table Version " + version)
+    Tool = TableGeocoder(apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName)
+    Tool.start()
+    arcpy.AddMessage("Geocode completed")
