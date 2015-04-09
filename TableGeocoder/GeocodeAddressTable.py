@@ -237,13 +237,12 @@ class TableGeocoder(object):
                         self._HandleCurrentResult(currentResult, resultList, outputFullPath)
                 #Matched address        
                 else:
-                    splitMatchAddress = coderResult["matchAddress"].split(",")
-                    matchAddress = splitMatchAddress[0]
-                    matchZone = ""
-                    if len(splitMatchAddress) > 1:
-                        matchZone = splitMatchAddress[1]
-                    else:
-                        matchZone = ""
+                    #: if address grid in zone remove it
+                    matchAddress = coderResult["matchAddress"]
+                    matchZone = coderResult["addressGrid"]
+                    
+                    if ',' in matchAddress:
+                        matchAddress = coderResult["matchAddress"].split(",")[0]
                         
                     splitInputAddress = coderResult["inputAddress"].split(",")
                     inputAddress = splitInputAddress[0]
@@ -335,7 +334,7 @@ if __name__ == "__main__":
     outputFileName = "mapservGeocodeResults_" + time.strftime("%Y%m%d%H%M%S") + ".csv"
     arcpy.SetParameterAsText(6, os.path.join(outputDir, outputFileName.replace(".csv", ".dbf")))
     
-    version = "2.1.8"
+    version = "2.1.9"
     arcpy.AddMessage("Geocode Table Version " + version)
     Tool = TableGeocoder(apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName)
     Tool.start()
