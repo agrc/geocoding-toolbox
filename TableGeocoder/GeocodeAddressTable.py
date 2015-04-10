@@ -7,6 +7,7 @@ Script tool for ArcGIS which geocodes a table of addresses and produces a new ta
 import urllib, urllib2, json, arcpy, os, time
 from operator import attrgetter
 
+VERSION_NUMBER = "2.1.9"
 
 class Geocoder(object):
 
@@ -335,7 +336,7 @@ if __name__ == "__main__":
     outputFileName = "mapservGeocodeResults_" + time.strftime("%Y%m%d%H%M%S") + ".csv"
     arcpy.SetParameterAsText(6, os.path.join(outputDir, outputFileName.replace(".csv", ".dbf")))
     
-    version = "2.1.9"
+    version = VERSION_NUMBER
     arcpy.AddMessage("Geocode Table Version " + version)
     Tool = TableGeocoder(apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName)
     Tool.start()

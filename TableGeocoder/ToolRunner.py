@@ -6,6 +6,7 @@ Created on Apr 4, 2014
 import arcpy, os
 from time import strftime
 from GeocodeAddressTable import TableGeocoder
+from GeocodeAddressTable import VERSION_NUMBER
 
 
 #Script tool parameters
@@ -22,7 +23,7 @@ arcpy.SetParameterAsText(6, os.path.join(outputDir, outputFileName.replace(".csv
 
 
 if __name__ == "__main__":
-    version = "2.1.6"
+    version = VERSION_NUMBER
     arcpy.AddMessage("Geocode Table Version " + version)
     Tool = TableGeocoder(apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName)
     Tool.start()

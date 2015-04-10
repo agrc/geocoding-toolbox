@@ -7,6 +7,7 @@ Script tool for ArcGIS which geocodes a table of addresses and produces a new ta
 import urllib, urllib2, json, arcpy, os, time
 from operator import attrgetter
 
+VERSION_NUMBER = "2.1.9"
 
 class Geocoder(object):
 
@@ -60,8 +61,9 @@ class Geocoder(object):
             r = urllib2.urlopen(req)    
             response = json.load(r)
             result = response["result"]["addresses"]
-        except:
+        except Exception as e:
             print "!!!!!!!!exception!!!!!!!!!!!!!"
+            print e
             result = None
 
         if r.getcode() is not 200 or response["status"] is not 200:
@@ -94,7 +96,7 @@ class AddressResult(object):
     @staticmethod
     def addHeaderResultCSV(outputFilePath):
         with open(outputFilePath, "a") as outCSV:
-            outCSV.write("{},{},{},{},{},{},{},{},{}".format("OBJID", "INADDR", "INZONE", 
+            outCSV.write("{},{},{},{},{},{},{},{},{}".format("INID", "INADDR", "INZONE", 
                                                       "MatchAddress", "Zone", "Score", 
                                                       "XCoord", "YCoord", "Geocoder" ))
     @staticmethod
@@ -107,7 +109,7 @@ class AddressResult(object):
     def createResultCSV(addrResultList, outputFilePath):
         """Replaced by appending method"""
         with open(outputFilePath, "w") as outCSV:
-            outCSV.write("{},{},{},{},{},{},{},{},{}".format("OBJID", "INADDR", "INZONE", 
+            outCSV.write("{},{},{},{},{},{},{},{},{}".format("INID", "INADDR", "INZONE", 
                                                           "MatchAddress", "Zone", "Score", 
                                                           "XCoord", "YCoord", "Geocoder" ))
             for result in addrResultList:
@@ -121,7 +123,8 @@ class AddressFormatter(object):
         self.zone = self._formatZone(inZone)
          
     def _formatAddress(self, inAddr):
-        formattedAddr = str(inAddr.strip().replace("#",""))
+        addrString = str(inAddr)
+        formattedAddr = str(addrString.strip().replace("#",""))
         
         for c in range(0,31):
             formattedAddr = formattedAddr.replace(chr(c)," ")
@@ -195,7 +198,7 @@ class TableGeocoder(object):
         -resultList is passed in by refernce and altered in this function.""" 
         currentResult = addressResult
         AddressResult.appendResultCSV(currentResult, outputFullPath)
-        resultList.append(currentResult)
+        #resultList.append(currentResult)
               
     def _ProcessIntermedaite(self, intermediateList, resultList, matchAddresses, outputFullPath):
         """-Handles a group of addresses that has been returned by the geocoder.
@@ -236,12 +239,21 @@ class TableGeocoder(object):
                         self._HandleCurrentResult(currentResult, resultList, outputFullPath)
                 #Matched address        
                 else:
-                    splitMatchAddress = coderResult["matchAddress"].split(",")
-                    matchAddress = splitMatchAddress[0]
-                    matchZone = splitMatchAddress[1]
+                    #: if address grid in zone remove it
+                    matchAddress = coderResult["matchAddress"]
+                    matchZone = coderResult["addressGrid"]
+                    
+                    if ',' in matchAddress:
+                        matchAddress = coderResult["matchAddress"].split(",")[0]
+                        
                     splitInputAddress = coderResult["inputAddress"].split(",")
                     inputAddress = splitInputAddress[0]
-                    inputZone = splitInputAddress[1]
+                    inputZone = ""
+                    if len(splitInputAddress) > 1:
+                        inputZone = splitInputAddress[1]
+                    else:
+                        inputZone = ""                    
+                    
                     currentResult = AddressResult(coderResult["id"], inputAddress, inputZone, 
                                                matchAddress, matchZone, coderResult["score"], 
                                                coderResult["location"]["x"], coderResult["location"]["y"], 
@@ -274,7 +286,7 @@ class TableGeocoder(object):
         arcpy.AddMessage("Begin Geocode.")
         AddressResult.addHeaderResultCSV(outputFullPath)
         i = 0#counts records and updates progress bar.
-        intermediateList = []#list for storing current geocode group.
+        intermediateGeocodeGrp = []#list for storing current geocode group.
         with arcpy.da.SearchCursor(self._inputTable, [self._idField, self._addressField, self._zoneField]) as cursor:
             for row in cursor:
                 i += 1
@@ -292,18 +304,18 @@ class TableGeocoder(object):
                 
                 #Handle badly formatted addresses    
                 if inFormattedAddress.isValid():
-                    intermediateList.append(inFormattedAddress)
+                    intermediateGeocodeGrp.append(inFormattedAddress)
                 else:
                         currentResult = AddressResult(row[0], inFormattedAddress.address, inFormattedAddress.zone, 
                                                         "Error: Address invalid or NULL fields", "", "", "", "", "")
                         self._HandleCurrentResult(currentResult, resultList, outputFullPath)
                 
                 #Send addresses to geocoder in a group
-                if len(intermediateList) == 95 or (i == record_count):
+                if len(intermediateGeocodeGrp) == 95 or (i == record_count):
                     time.sleep(20)
-                    matchAddresses = geocoder.locateAddresses(intermediateList, **{"spatialReference": self._spatialRef, "locators": self._locator})
-                    self._ProcessIntermedaite(intermediateList, resultList, matchAddresses, outputFullPath)    
-                    intermediateList = []
+                    matchAddresses = geocoder.locateAddresses(intermediateGeocodeGrp, **{"spatialReference": self._spatialRef, "locators": self._locator, "pobox": True})
+                    self._ProcessIntermedaite(intermediateGeocodeGrp, resultList, matchAddresses, outputFullPath)    
+                    intermediateGeocodeGrp = []
        
         #Create dbf table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
         arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName), os.path.join(self._outputDir, self._outputFileName.replace(".csv", ".dbf")))
@@ -324,7 +336,7 @@ if __name__ == "__main__":
     outputFileName = "mapservGeocodeResults_" + time.strftime("%Y%m%d%H%M%S") + ".csv"
     arcpy.SetParameterAsText(6, os.path.join(outputDir, outputFileName.replace(".csv", ".dbf")))
     
-    version = "2.1.7"
+    version = VERSION_NUMBER
     arcpy.AddMessage("Geocode Table Version " + version)
     Tool = TableGeocoder(apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName)
     Tool.start()
