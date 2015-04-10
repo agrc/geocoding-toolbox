@@ -60,8 +60,9 @@ class Geocoder(object):
             r = urllib2.urlopen(req)    
             response = json.load(r)
             result = response["result"]["addresses"]
-        except:
+        except Exception as e:
             print "!!!!!!!!exception!!!!!!!!!!!!!"
+            print e
             result = None
 
         if r.getcode() is not 200 or response["status"] is not 200:
