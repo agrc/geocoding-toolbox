@@ -12,7 +12,7 @@ import os
 import time
 from operator import attrgetter
 
-VERSION_NUMBER = "2.1.9"
+VERSION_NUMBER = "2.1.10"
 
 
 class Geocoder(object):
@@ -52,6 +52,7 @@ class Geocoder(object):
 
     def locateAddresses(self, formattedAddresses, **kwargs):
         """Return a list of address that were matched."""
+        r = None
         try:
             kwargs["apiKey"] = self._api_key
             params = urllib.urlencode(kwargs)
@@ -69,7 +70,7 @@ class Geocoder(object):
             print e
             result = None
 
-        if r.getcode() is not 200 or response["status"] is not 200:
+        if r is None or r.getcode() is not 200 or response["status"] is not 200:
             result = None
 
         return result
@@ -212,12 +213,16 @@ class TableGeocoder(object):
             -Lists are passed in by refernce and altered in this function."""
 
         locatorErrorText = "Error: Locator error"
+        if len(intermediateList) == 0:
+            arcpy.AddWarning("Block of invalid addresses")
+            currentResult = AddressResult(-1, "", "", "Error: address format error", "", "", "", "", "")
+            self._HandleCurrentResult(currentResult, resultList, outputFullPath)
         # Locator response Error
-        if matchAddresses is None:
+        elif matchAddresses is None:
             minErrorId = min(intermediateList, key=attrgetter('id'))
             maxErrorId = max(intermediateList, key=attrgetter('id'))
             print "!!!Exception!!!"
-            arcpy.AddMessage(format("Address ID's {} to {} failed", minErrorId, maxErrorId))
+            arcpy.AddWarning(format("Address ID's {} to {} failed", minErrorId, maxErrorId))
             # Append min and max id in geocode group
             currentResult = AddressResult(minErrorId, "", "", locatorErrorText + " r", "", "", "", "", "")
             self._HandleCurrentResult(currentResult, resultList, outputFullPath)
