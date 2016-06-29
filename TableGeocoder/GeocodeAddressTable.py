@@ -12,7 +12,7 @@ import os
 import time
 from operator import attrgetter
 
-VERSION_NUMBER = "2.1.10"
+VERSION_NUMBER = "2.1.11"
 
 
 class Geocoder(object):
@@ -219,15 +219,15 @@ class TableGeocoder(object):
             self._HandleCurrentResult(currentResult, resultList, outputFullPath)
         # Locator response Error
         elif matchAddresses is None:
-            minErrorId = min(intermediateList, key=attrgetter('id'))
-            maxErrorId = max(intermediateList, key=attrgetter('id'))
+            minErrorAddress = min(intermediateList, key=attrgetter('id'))
+            maxErrorAddress = max(intermediateList, key=attrgetter('id'))
             print "!!!Exception!!!"
-            arcpy.AddWarning(format("Address ID's {} to {} failed", minErrorId, maxErrorId))
+            arcpy.AddWarning("Address ID's {} to {} failed".format(minErrorAddress.id, maxErrorAddress.id))
             # Append min and max id in geocode group
-            currentResult = AddressResult(minErrorId, "", "", locatorErrorText + " r", "", "", "", "", "")
+            currentResult = AddressResult(minErrorAddress.id, "", "", locatorErrorText, "", "", "", "", "")
             self._HandleCurrentResult(currentResult, resultList, outputFullPath)
 
-            currentResult = AddressResult(maxErrorId, "", "", locatorErrorText + " r", "", "", "", "", "")
+            currentResult = AddressResult(maxErrorAddress.id, "", "", locatorErrorText, "", "", "", "", "")
             self._HandleCurrentResult(currentResult, resultList, outputFullPath)
         else:
             for coderResult in matchAddresses:
