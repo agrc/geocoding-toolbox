@@ -1,6 +1,6 @@
 geocoding-addin
 ===============
-
+Supports ArcGIS versions: 10.3.1, 10.4
 ## Geocode Table tool
 TableGeocoder\GeocodeAddressTable.py
 - Implements the Geocode Table tool with the AGRC Multiple Address geocoding service.
