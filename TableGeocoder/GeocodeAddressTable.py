@@ -12,14 +12,15 @@ import os
 import time
 from operator import attrgetter
 
-VERSION_NUMBER = "2.1.11"
+VERSION_NUMBER = "3.0.0"
+RATE_LIMIT_SECONDS = 0.02
 
 
 class Geocoder(object):
     """Geocode and address and check api keys."""
 
     _api_key = None
-    _url_template = "http://api.mapserv.utah.gov/api/v1/geocode/multiple?{}"
+    _url_template = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}" # "http://api.mapserv.utah.gov/api/v1/geocode/multiple?{}"
 
     def __init__(self, api_key):
         """Constructor."""
@@ -49,6 +50,21 @@ class Geocoder(object):
             return "Error: " + str(response["message"])
         else:
             return "Api key is valid."
+
+    def locateAddress(self, formattedAddress, **kwargs):
+        apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
+        params = urllib.urlencode({"apiKey": self._api_key})
+        url = apiCheck_Url.format(formattedAddress.address, formattedAddress.zone, params)
+        r = urllib.urlopen(url)
+        try:
+            response = json.load(r)
+        except:
+            return "Error: Service did not respond."
+        # print response
+        # if r.getcode() is not 200 or r.getcode() is not 404:
+        #     return "Error: " + str(response["message"])
+        # else:
+        return response
 
     def locateAddresses(self, formattedAddresses, **kwargs):
         """Return a list of address that were matched."""
@@ -132,7 +148,7 @@ class AddressFormatter(object):
 
     def _formatAddress(self, inAddr):
         addrString = str(inAddr)
-        formattedAddr = str(addrString.strip().replace("#", ""))
+        formattedAddr = str(addrString.strip().replace("#", "").replace('/', ''))
 
         for c in range(0, 31):
             formattedAddr = formattedAddr.replace(chr(c), " ")
@@ -270,6 +286,51 @@ class TableGeocoder(object):
                                                   coderResult["locator"])
                     self._HandleCurrentResult(currentResult, resultList, outputFullPath)
 
+    def _processMatch(self, resultList, coderResponse, formattedAddr, outputFullPath):
+        """-Handles a group of addresses that has been returned by the geocoder.
+            -Lists are passed in by refernce and altered in this function."""
+
+        locatorErrorText = "Error: Locator error"
+        addressId = formattedAddr.id
+        # Locator response Error
+        if coderResponse is None:
+            print "!!!Exception!!!"
+            arcpy.AddWarning("Address ID {} failed".format(addressId))
+            # Append min and max id in geocode group
+            currentResult = AddressResult(addressId, "", "", locatorErrorText, "", "", "", "", "")
+            self._HandleCurrentResult(currentResult, resultList, outputFullPath)
+        else:
+            if coderResponse["status"] == 404:
+                # address not found error
+                inputAddress = formattedAddr.address
+                inputZone = formattedAddr.zone
+                currentResult = AddressResult(addressId, inputAddress, inputZone,
+                                              "Error: " + coderResponse["message"], "", "", "", "", "")
+                self._HandleCurrentResult(currentResult, resultList, outputFullPath)
+            # Matched address
+            else:
+                coderResult = coderResponse["result"]
+                #: if address grid in zone remove it
+                matchAddress = coderResult["matchAddress"]
+                matchZone = coderResult["addressGrid"]
+
+                if ',' in matchAddress:
+                    matchAddress = coderResult["matchAddress"].split(",")[0]
+
+                splitInputAddress = coderResult["inputAddress"].split(",")
+                inputAddress = splitInputAddress[0]
+                inputZone = ""
+                if len(splitInputAddress) > 1:
+                    inputZone = splitInputAddress[1]
+                else:
+                    inputZone = ""
+
+                currentResult = AddressResult(addressId, inputAddress, inputZone,
+                                              matchAddress, matchZone, coderResult["score"],
+                                              coderResult["location"]["x"], coderResult["location"]["y"],
+                                              coderResult["locator"])
+                self._HandleCurrentResult(currentResult, resultList, outputFullPath)
+
     def start(self):
         resultList = []
         outputFullPath = os.path.join(self._outputDir, self._outputFileName)
@@ -313,25 +374,32 @@ class TableGeocoder(object):
 
                 # Handle badly formatted addresses
                 if inFormattedAddress.isValid():
-                    intermediateGeocodeGrp.append(inFormattedAddress)
+                    time.sleep(RATE_LIMIT_SECONDS)
+                    matchedAddress = geocoder.locateAddress(inFormattedAddress,
+                                                            **{"spatialReference": self._spatialRef,
+                                                                "locators": self._locator,
+                                                                "pobox": True})
+                    self._processMatch(resultList, matchedAddress, inFormattedAddress, outputFullPath)
+
                 else:
                         currentResult = AddressResult(row[0], inFormattedAddress.address, inFormattedAddress.zone,
                                                       "Error: Address invalid or NULL fields", "", "", "", "", "")
                         self._HandleCurrentResult(currentResult, resultList, outputFullPath)
 
                 # Send addresses to geocoder in a group
-                if len(intermediateGeocodeGrp) == 95 or (i == record_count):
-                    time.sleep(20)
-                    matchAddresses = geocoder.locateAddresses(intermediateGeocodeGrp,
-                                                              **{"spatialReference": self._spatialRef,
-                                                                 "locators": self._locator,
-                                                                 "pobox": True})
-                    self._ProcessIntermedaite(intermediateGeocodeGrp, resultList, matchAddresses, outputFullPath)
-                    intermediateGeocodeGrp = []
+                # if len(intermediateGeocodeGrp) == 95 or (i == record_count):
+                #     time.sleep(20)
+                #     matchAddresses = geocoder.locateAddresses(intermediateGeocodeGrp,
+                #                                               **{"spatialReference": self._spatialRef,
+                #                                                  "locators": self._locator,
+                #                                                  "pobox": True})
+                #     self._ProcessIntermedaite(intermediateGeocodeGrp, resultList, matchAddresses, outputFullPath)
+                #     intermediateGeocodeGrp = []
 
         # Create dbf table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
         arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName),
                                   os.path.join(self._outputDir, self._outputFileName.replace(".csv", ".dbf")))
+
 
 if __name__ == "__main__":
     apiKey = arcpy.GetParameterAsText(0)
