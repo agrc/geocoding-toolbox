@@ -13,7 +13,7 @@ import random
 
 VERSION_NUMBER = "3.0.4"
 RATE_LIMIT_SECONDS = 0.02
-
+UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
 
 class Tooling():
     RESPONES = []
@@ -203,7 +203,7 @@ class TableGeocoder(object):
                      "NAD 1983 StatePlane Utah South(Meters)": 32144,
                      "GCS WGS 1984": 4326}
 
-    def __init__(self, apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName):
+    def __init__(self, apiKey, inputTable, idField, addressField, zoneField, locator, spatialRef, outputDir, outputFileName, outputGeodatabase):
         """ctor."""
         self._apiKey = apiKey
         self._inputTable = inputTable
@@ -214,6 +214,7 @@ class TableGeocoder(object):
         self._spatialRef = spatialRef
         self._outputDir = outputDir
         self._outputFileName = outputFileName
+        self._outputGdb = outputGeodatabase
 
 #
 # Helper Functions
@@ -349,9 +350,9 @@ class TableGeocoder(object):
             if not e.message.strip():
                 raise(e)
 
-        # Create dbf table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
+        # Create gdb table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
         arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName),
-                                  os.path.join(self._outputDir, self._outputFileName.replace(".csv", ".dbf")))
+                                  os.path.join(self._outputGdb, self._outputFileName.replace(".csv", "")))
 
 
 if __name__ == "__main__":
@@ -363,8 +364,9 @@ if __name__ == "__main__":
     locator = TableGeocoder.locatorMap[str(arcpy.GetParameterAsText(5))]
     spatialRef = TableGeocoder.spatialRefMap[str(arcpy.GetParameterAsText(6))]
     outputDir = arcpy.GetParameterAsText(7)
-    outputFileName = "mapservGeocodeResults_" + time.strftime("%Y%m%d%H%M%S") + ".csv"
-    arcpy.SetParameterAsText(8, os.path.join(outputDir, outputFileName.replace(".csv", ".dbf")))
+    outputFileName = "GeocodeResults_" + UNIQUE_RUN + ".csv"
+    outputGeodatabase = arcpy.CreateFileGDB_management(outputDir, "GeocodeTool_" + UNIQUE_RUN + ".gdb")[0]
+    arcpy.SetParameterAsText(8, os.path.join(outputGeodatabase, outputFileName.replace(".csv", "")))
 
     version = VERSION_NUMBER
     arcpy.AddMessage("Geocode Table Version " + version)
@@ -376,7 +378,8 @@ if __name__ == "__main__":
                          locator,
                          spatialRef,
                          outputDir,
-                         outputFileName)
+                         outputFileName,
+                         outputGeodatabase)
     Tool.start()
     if len(Tooling.RESPONES) > 0:
         arcpy.AddMessage("average time: {} len: {}".format(sum(Tooling.RESPONES)/len(Tooling.RESPONES), len(Tooling.RESPONES)))
