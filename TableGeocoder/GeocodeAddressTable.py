@@ -17,6 +17,7 @@ UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
 
 class Tooling():
     RESPONES = []
+    PROCESSES = []
     REQUEST_TIME = 1
     FAIL = 1
 
@@ -27,7 +28,7 @@ def api_retry(api_call):
         response = api_call(*args, **kwargs)
         back_off = 1
         while response is None and back_off <= 8:
-            arcpy.AddMessage(back_off)
+            arcpy.AddMessage('Retry wait: {}'.format(back_off))
             time.sleep(back_off + random.random())
             response = api_call(*args, **kwargs)
             back_off += back_off
@@ -60,8 +61,8 @@ class Geocoder(object):
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
         params = urllib.urlencode({"apiKey": self._api_key})
         url = apiCheck_Url.format("270 E CENTER ST", "LINDON", params)
-        r = urllib.urlopen(url)
         try:
+            r = urllib.urlopen(url)
             response = json.load(r)
         except:
             return None
@@ -78,18 +79,16 @@ class Geocoder(object):
     def locateAddress(self, formattedAddress, **kwargs):
         """Create URL from formatted address and send to api."""
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
-        params = urllib.urlencode({"apiKey": self._api_key})
+        params = urllib.urlencode({"apiKey": self._api_key, "pobox": "true"})
         url = apiCheck_Url.format(formattedAddress.address, formattedAddress.zone, params)
-        Tooling.REQUEST_TIME = time.time() - Tooling.REQUEST_TIME
-        Tooling.RESPONES.append(Tooling.REQUEST_TIME)
-        Tooling.REQUEST_TIME = time.time()
-        r = urllib.urlopen(url)
-
         try:
+            resTime = time.time()
+            r = urllib.urlopen(url)
+            Tooling.RESPONES.append(time.time() - resTime)
             response = json.load(r)
         except:
             return None
-
+        Tooling.PROCESSES.append(int(r.info()['X-Elapsed-Time']) / 1000.0)
         if r.getcode() >= 500:
             return None
         else:
@@ -102,6 +101,16 @@ class AddressResult(object):
 
     Also contains static methods for writing a list AddressResults to different formats.
     """
+
+    outputFields = ("INID", "INADDR", "INZONE",
+                    "MatchAddress", "Zone", "Score",
+                    "XCoord", "YCoord", "Geocoder")
+    outputFieldTypes = ["TEXT", "TEXT", "TEXT",
+                        "TEXT", "TEXT", "FLOAT",
+                        "DOUBLE", "DOUBLE", "TEXT"]
+    outputTextLengths = [100, 200, 12,
+                         200, 12, None,
+                         None, None, 50]
 
     def __init__(self, idValue, inAddr, inZone, matchAddr, zone, score, x, y, geoCoder):
         """ctor."""
@@ -117,17 +126,29 @@ class AddressResult(object):
 
     def __str__(self):
         """str."""
-        return "{},{},{},{},{},{},{},{},{}".format(self.id, self.inAddress, self.inZone,
-                                                   self.matchAddress, self.zone, self.score,
-                                                   self.matchX, self.matchY, self.geoCoder)
+        return "{},{},{},{},{},{},{},{},{}".format(*self.get_fields())
+
+    def get_fields(self):
+        """Get fields in output table order."""
+        return (self.id, self.inAddress, self.inZone,
+                self.matchAddress, self.zone, self.score,
+                self.matchX, self.matchY, self.geoCoder)
+
+    def getResultRow(self):
+        """Get tuple of fields for InsertCursor."""
+        outRow = []
+        for f in self.get_fields():
+            if f == "":
+                outRow.append(None)
+            else:
+                outRow.append(f)
+        return outRow
 
     @staticmethod
     def addHeaderResultCSV(outputFilePath):
         """Add header to CSV."""
         with open(outputFilePath, "a") as outCSV:
-            outCSV.write("{},{},{},{},{},{},{},{},{}".format("INID", "INADDR", "INZONE",
-                                                             "MatchAddress", "Zone", "Score",
-                                                             "XCoord", "YCoord", "Geocoder"))
+            outCSV.write(",".join(AddressResult.outputFields))
 
     @staticmethod
     def appendResultCSV(addrResult, outputFilePath):
@@ -147,7 +168,7 @@ class AddressFormatter(object):
 
     def _formatAddress(self, inAddr):
         addrString = str(inAddr)
-        formattedAddr = str(addrString.strip().replace("#", "").replace('/', ''))
+        formattedAddr = str(addrString.strip().replace("#", " ").replace('/', " ").replace("%", " "))
 
         for c in range(0, 31):
             formattedAddr = formattedAddr.replace(chr(c), " ")
@@ -216,15 +237,38 @@ class TableGeocoder(object):
         self._outputFileName = outputFileName
         self._outputGdb = outputGeodatabase
 
-#
-# Helper Functions
-#
-    def _HandleCurrentResult(self, addressResult, outputFullPath):
+    #
+    # Helper Functions
+    #
+    def _createOutputTable(self):
+        """Create output table and add fields."""
+        def _addFieldsToOutputTable(outputFullPath):
+            fields = zip(AddressResult.outputFields, AddressResult.outputFieldTypes, AddressResult.outputTextLengths)
+            for field in fields:
+                name, fieldType, textLength = field
+                arcpy.AddField_management(outputFullPath,
+                                          name,
+                                          fieldType,
+                                          field_length=textLength)
+
+        insertTable = arcpy.CreateTable_management(self._outputGdb,
+                                                   self._outputFileName.replace(".csv", ""))[0]
+        inputIdType = [f.type.lower() for f in arcpy.ListFields(self._inputTable) if f.name.lower() == self._idField.lower()][0]
+        if inputIdType in ['oid', 'objectid', 'integer', 'smallinteger']:
+            AddressResult.outputFieldTypes[0] = 'LONG'
+            AddressResult.outputTextLengths[0] = None
+
+        _addFieldsToOutputTable(insertTable)
+
+        return insertTable
+
+    def _HandleCurrentResult(self, addressResult, outputFullPath, outputCursor):
         """Handle appending a geocoded address to the output CSV."""
         currentResult = addressResult
         AddressResult.appendResultCSV(currentResult, outputFullPath)
+        outputCursor.insertRow(addressResult.getResultRow())
 
-    def _processMatch(self, coderResponse, formattedAddr, outputFullPath):
+    def _processMatch(self, coderResponse, formattedAddr, outputFullPath, outputCursor):
         """Handle an address that has been returned by the geocoder."""
         locatorErrorText = "Error: Locator error"
         addressId = formattedAddr.id
@@ -234,7 +278,7 @@ class TableGeocoder(object):
             arcpy.AddWarning("Address ID {} failed".format(addressId))
             # Append min and max id in geocode group
             currentResult = AddressResult(addressId, "", "", locatorErrorText, "", "", "", "", "")
-            self._HandleCurrentResult(currentResult, outputFullPath)
+            self._HandleCurrentResult(currentResult, outputFullPath, outputCursor)
         else:
             if coderResponse["status"] == 404:
                 # address not found error
@@ -242,7 +286,7 @@ class TableGeocoder(object):
                 inputZone = formattedAddr.zone
                 currentResult = AddressResult(addressId, inputAddress, inputZone,
                                               "Error: " + coderResponse["message"], "", "", "", "", "")
-                self._HandleCurrentResult(currentResult, outputFullPath)
+                self._HandleCurrentResult(currentResult, outputFullPath, outputCursor)
             # Matched address
             else:
                 coderResult = coderResponse["result"]
@@ -265,11 +309,10 @@ class TableGeocoder(object):
                                               matchAddress, matchZone, coderResult["score"],
                                               coderResult["location"]["x"], coderResult["location"]["y"],
                                               coderResult["locator"])
-                self._HandleCurrentResult(currentResult, outputFullPath)
+                self._HandleCurrentResult(currentResult, outputFullPath, outputCursor)
 
     def start(self):
         """Entery point into geocoding process."""
-        Tooling.REQUEST_TIME = time.time()
         outputFullPath = os.path.join(self._outputDir, self._outputFileName)
 
         # Setup progress bar
@@ -295,26 +338,34 @@ class TableGeocoder(object):
 
         arcpy.AddMessage("Begin Geocode.")
         AddressResult.addHeaderResultCSV(outputFullPath)
-        try:
-            with arcpy.da.SearchCursor(self._inputTable, [self._idField, self._addressField, self._zoneField]) as cursor:
-                for row in cursor:
+        insertTable = self._createOutputTable()
+        sequentialBadRequests = 0
+        with arcpy.da.SearchCursor(self._inputTable, [self._idField, self._addressField, self._zoneField]) as cursor, \
+                arcpy.da.InsertCursor(insertTable, AddressResult.outputFields) as outCursor:
+            for row in cursor:
 
-                    try:
-                        inFormattedAddress = AddressFormatter(row[0], row[1], row[2])
-                    except UnicodeEncodeError:
-                        currentResult = AddressResult(row[0], "", "",
-                                                      "Error: Unicode special character encountered", "", "", "", "", "")
-                        self._HandleCurrentResult(currentResult, outputFullPath)
+                try:
+                    inFormattedAddress = AddressFormatter(row[0], row[1], row[2])
+                except UnicodeEncodeError:
+                    currentResult = AddressResult(row[0], "", "",
+                                                  "Error: Unicode special character encountered", "", "", "", "", "")
+                    self._HandleCurrentResult(currentResult, outputFullPath, outCursor)
 
-                    # Check for major address format problems before sending to api
-                    if inFormattedAddress.isValid():
-                        time.sleep(RATE_LIMIT_SECONDS)
-                        matchedAddress = geocoder.locateAddress(inFormattedAddress,
-                                                                **{"spatialReference": self._spatialRef,
-                                                                    "locators": self._locator,
-                                                                    "pobox": True})
+                # Check for major address format problems before sending to api
+                if inFormattedAddress.isValid():
+                    time.sleep(RATE_LIMIT_SECONDS)
+                    matchedAddress = geocoder.locateAddress(inFormattedAddress,
+                                                            **{"spatialReference": self._spatialRef,
+                                                                "locators": self._locator,
+                                                                "pobox": True})
 
-                        if matchedAddress is None:
+                    if matchedAddress is None:
+                        sequentialBadRequests += 1
+                        if sequentialBadRequests <= 5:
+                            currentResult = AddressResult(row[0], "", "",
+                                                          "Error: Geocode failed", "", "", "", "", "")
+                            self._HandleCurrentResult(currentResult, outputFullPath, outCursor)
+                        else:
                             error_msg = "Geocode Service Failed to respond{}"
                             if rowNum > 1:
                                 error_msg = error_msg.format(
@@ -326,33 +377,20 @@ class TableGeocoder(object):
 
                             return
 
-                        self._processMatch(matchedAddress, inFormattedAddress, outputFullPath)
+                        continue
 
-                    else:
-                            currentResult = AddressResult(row[0], inFormattedAddress.address, inFormattedAddress.zone,
-                                                          "Error: Address invalid or NULL fields", "", "", "", "", "")
-                            self._HandleCurrentResult(currentResult, outputFullPath)
+                    self._processMatch(matchedAddress, inFormattedAddress, outputFullPath, outCursor)
 
-                    # Update progress bar
+                else:
+                        currentResult = AddressResult(row[0], inFormattedAddress.address, inFormattedAddress.zone,
+                                                      "Error: Address invalid or NULL fields", "", "", "", "", "")
+                        self._HandleCurrentResult(currentResult, outputFullPath, outCursor)
 
-                    if (rowNum % increment) == 1:
-                        arcpy.SetProgressorPosition(rowNum)
-                    rowNum += 1
-
-        except Exception as e:
-            error_msg = "Tool failed{}\n{}"
-            if rowNum > 1:
-                error_msg = error_msg.format(
-                    "\n{} adresses completed\nCheck: {} for partial table".format(rowNum - 1, outputFullPath), e.message)
-            else:
-                error_msg = error_msg.format("", e.message)
-            arcpy.AddError(error_msg)
-            if not e.message.strip():
-                raise(e)
-
-        # Create gdb table from the csv at the end. This table will automatically be added to TOC when run in arcmap.
-        arcpy.CopyRows_management(os.path.join(self._outputDir, self._outputFileName),
-                                  os.path.join(self._outputGdb, self._outputFileName.replace(".csv", "")))
+                # Update progress bar
+                if (rowNum % increment) == 1:
+                    arcpy.SetProgressorPosition(rowNum)
+                rowNum += 1
+                sequentialBadRequests = 0
 
 
 if __name__ == "__main__":
@@ -382,5 +420,6 @@ if __name__ == "__main__":
                          outputGeodatabase)
     Tool.start()
     if len(Tooling.RESPONES) > 0:
-        arcpy.AddMessage("average time: {} len: {}".format(sum(Tooling.RESPONES)/len(Tooling.RESPONES), len(Tooling.RESPONES)))
+        arcpy.AddMessage("average res time: {}".format(sum(Tooling.RESPONES)/len(Tooling.RESPONES)))
+        arcpy.AddMessage("average geo time: {}".format(sum(Tooling.PROCESSES)/len(Tooling.PROCESSES)))
     arcpy.AddMessage("Geocode completed")
