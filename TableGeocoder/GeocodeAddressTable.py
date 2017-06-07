@@ -12,14 +12,9 @@ import time
 import random
 
 VERSION_NUMBER = "3.0.4"
-RATE_LIMIT_SECONDS = 0.02
+VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/back-to-single/tool-version.json"
+RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
-
-class Tooling():
-    RESPONES = []
-    PROCESSES = []
-    REQUEST_TIME = 1
-    FAIL = 1
 
 
 def api_retry(api_call):
@@ -34,6 +29,21 @@ def api_retry(api_call):
             back_off += back_off
         return response
     return retry
+
+
+@api_retry
+def get_version(check_url):
+    """Get current version number."""
+    try:
+        r = urllib.urlopen(check_url)
+        response = json.load(r)
+    except:
+        return None
+    if r.getcode() is 200:
+        currentVersion = response['VERSION_NUMBER']
+        return currentVersion
+    else:
+        return None
 
 
 class Geocoder(object):
@@ -82,13 +92,11 @@ class Geocoder(object):
         params = urllib.urlencode({"apiKey": self._api_key, "pobox": "true"})
         url = apiCheck_Url.format(formattedAddress.address, formattedAddress.zone, params)
         try:
-            resTime = time.time()
             r = urllib.urlopen(url)
-            Tooling.RESPONES.append(time.time() - resTime)
             response = json.load(r)
         except:
             return None
-        Tooling.PROCESSES.append(int(r.info()['X-Elapsed-Time']) / 1000.0)
+
         if r.getcode() >= 500:
             return None
         else:
@@ -276,7 +284,7 @@ class TableGeocoder(object):
         if coderResponse is None:
             print "!!!Exception!!!"
             arcpy.AddWarning("Address ID {} failed".format(addressId))
-            # Append min and max id in geocode group
+            # Handle bad response
             currentResult = AddressResult(addressId, "", "", locatorErrorText, "", "", "", "", "")
             self._HandleCurrentResult(currentResult, outputFullPath, outputCursor)
         else:
@@ -353,7 +361,8 @@ class TableGeocoder(object):
 
                 # Check for major address format problems before sending to api
                 if inFormattedAddress.isValid():
-                    time.sleep(RATE_LIMIT_SECONDS)
+                    throttleTime = random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1])
+                    time.sleep(throttleTime)
                     matchedAddress = geocoder.locateAddress(inFormattedAddress,
                                                             **{"spatialReference": self._spatialRef,
                                                                 "locators": self._locator,
@@ -408,6 +417,10 @@ if __name__ == "__main__":
 
     version = VERSION_NUMBER
     arcpy.AddMessage("Geocode Table Version " + version)
+    currentVersion = get_version(VERSION_CHECK_URL)
+    if currentVersion and VERSION_NUMBER != currentVersion:
+        arcpy.AddWarning('Current version is: {}'.format(currentVersion))
+        arcpy.AddWarning('Please download at: https://github.com/agrc/geocoding-toolbox/raw/master/AGRC Geocode Tools.tbx')
     Tool = TableGeocoder(apiKey,
                          inputTable,
                          idField,
@@ -419,7 +432,4 @@ if __name__ == "__main__":
                          outputFileName,
                          outputGeodatabase)
     Tool.start()
-    if len(Tooling.RESPONES) > 0:
-        arcpy.AddMessage("average res time: {}".format(sum(Tooling.RESPONES)/len(Tooling.RESPONES)))
-        arcpy.AddMessage("average geo time: {}".format(sum(Tooling.PROCESSES)/len(Tooling.PROCESSES)))
     arcpy.AddMessage("Geocode completed")

@@ -21,8 +21,8 @@ if __name__ == '__main__':
     rows_passed = 0
     with arcpy.da.SearchCursor(results, fields) as actual_cursor, \
             arcpy.da.SearchCursor(expected_table, fields) as expected_cursor:
-            for actual_row in actual_cursor:
-                expected_row = expected_cursor.next()
+            for expected_row in expected_cursor:
+                actual_row = actual_cursor.next()
                 total_rows += 1
                 failed = False
                 act_id, act_inaddr, act_inzone, act_matchaddr, act_zone, act_score, act_x, act_y = actual_row
