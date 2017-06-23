@@ -10,9 +10,10 @@ import arcpy
 import os
 import time
 import random
+import re
 
-VERSION_NUMBER = "3.0.4"
-VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/back-to-single/tool-version.json"
+VERSION_NUMBER = "3.0.5"
+VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json"
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
 
@@ -23,7 +24,6 @@ def api_retry(api_call):
         response = api_call(*args, **kwargs)
         back_off = 1
         while response is None and back_off <= 8:
-            arcpy.AddMessage('Retry wait: {}'.format(back_off))
             time.sleep(back_off + random.random())
             response = api_call(*args, **kwargs)
             back_off += back_off
@@ -116,8 +116,8 @@ class AddressResult(object):
     outputFieldTypes = ["TEXT", "TEXT", "TEXT",
                         "TEXT", "TEXT", "FLOAT",
                         "DOUBLE", "DOUBLE", "TEXT"]
-    outputTextLengths = [100, 200, 12,
-                         200, 12, None,
+    outputTextLengths = [100, 200, 100,
+                         200, 100, None,
                          None, None, 50]
 
     def __init__(self, idValue, inAddr, inZone, matchAddr, zone, score, x, y, geoCoder):
@@ -167,7 +167,7 @@ class AddressResult(object):
 
 class AddressFormatter(object):
     """Address formating utility."""
-
+    spaceReplaceMatcher = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%')
     def __init__(self, idNum, inAddr, inZone):
         """Ctor."""
         self.id = idNum
@@ -176,7 +176,8 @@ class AddressFormatter(object):
 
     def _formatAddress(self, inAddr):
         addrString = str(inAddr)
-        formattedAddr = str(addrString.strip().replace("#", " ").replace('/', " ").replace("%", " "))
+
+        formattedAddr = AddressFormatter.spaceReplaceMatcher.sub(" ", addrString)
 
         for c in range(0, 31):
             formattedAddr = formattedAddr.replace(chr(c), " ")
@@ -265,6 +266,12 @@ class TableGeocoder(object):
         if inputIdType in ['oid', 'objectid', 'integer', 'smallinteger']:
             AddressResult.outputFieldTypes[0] = 'LONG'
             AddressResult.outputTextLengths[0] = None
+        elif inputIdType in ['double']:
+            AddressResult.outputFieldTypes[0] = 'DOUBLE'
+            AddressResult.outputTextLengths[0] = None
+        elif inputIdType in ['single']:
+            AddressResult.outputFieldTypes[0] = 'FLOAT'
+            AddressResult.outputTextLengths[0] = None
 
         _addFieldsToOutputTable(insertTable)
 
@@ -309,7 +316,7 @@ class TableGeocoder(object):
                 inputAddress = splitInputAddress[0]
                 inputZone = ""
                 if len(splitInputAddress) > 1:
-                    inputZone = splitInputAddress[1]
+                    inputZone = splitInputAddress[1].strip()
                 else:
                     inputZone = ""
 

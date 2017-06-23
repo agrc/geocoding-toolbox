@@ -15,7 +15,7 @@ if __name__ == '__main__':
                                  'zone',
                                  'Address points and road centerlines (default)',
                                  'NAD 1983 UTM Zone 12N',
-                                 r'C:\GisWork\temp')
+                                 r'Data\TestOutput')
 
     total_rows = 0
     rows_passed = 0

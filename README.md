@@ -1,9 +1,9 @@
 geocoding-addin
 ===============
-Supports ArcGIS versions: 10.3.1, 10.4
+Supports ArcGIS versions: 10.3.1, 10.4, 10.5
 ## Geocode Table tool
 TableGeocoder\GeocodeAddressTable.py
-- Implements the Geocode Table tool with the AGRC Multiple Address geocoding service.
+- Implements the Geocode Table tool with the AGRC geocoding service.
 
 ### Build and Install
 AGRC Geocode Tools.tbx
@@ -12,7 +12,7 @@ AGRC Geocode Tools.tbx
 
 ### Testing
 TableGeocoder\AGRC Geocode Tools.tbx
-- Tool box without imported script that will run GeocodeAddressTable.py directly. This tool can be run with TableGeocoder\Data\TestData.gdb\AddressTable for a simple manual test.
+- Tool box without imported script that will run GeocodeAddressTable.py directly. This tool can be run with GeocodeAddressTableTests.py for a simple test.
 - ArcGIS tool boxes do not accept relative paths. You will need to set the script file property of the tool box with ArcCatalog to the full path of GeocodeAddressTable.py on your machine.
 
 ###More information:
