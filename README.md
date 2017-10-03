@@ -16,4 +16,4 @@ TableGeocoder\AGRC Geocode Tools.tbx
 - ArcGIS tool boxes do not accept relative paths. You will need to set the script file property of the tool box with ArcCatalog to the full path of GeocodeAddressTable.py on your machine.
 
 ###More information:
-http://gis.utah.gov/new-utah-geocoding-toolbox-for-arcgis-desktop-2/
+https://gis.utah.gov/data/address-geocoders-locators/#GeocodingToolbox

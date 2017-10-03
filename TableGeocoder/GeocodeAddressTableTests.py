@@ -8,7 +8,7 @@ if __name__ == '__main__':
               "MatchAddress", "Zone", "Score",
               "XCoord", "YCoord")
 
-    results = arcpy.GeocodeTable('AGRC-53509626743181',
+    results = arcpy.GeocodeTable('AGRC-apikey',
                                  r'Data\TestData.gdb\AddressTable',
                                  'OBJECTID',
                                  'ADDRESS',
