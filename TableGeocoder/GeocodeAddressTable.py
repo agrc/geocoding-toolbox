@@ -88,7 +88,7 @@ class Geocoder(object):
             return "Api key is valid."
 
     @api_retry
-    def locateAddress(self, formattedAddress, **kwargs):
+    def locateAddress(self, formattedAddress):
         """Create URL from formatted address and send to api."""
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
         params = urllib.urlencode({"spatialReference": self._spatialRef,
@@ -375,10 +375,7 @@ class TableGeocoder(object):
                 if inFormattedAddress.isValid():
                     throttleTime = random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1])
                     time.sleep(throttleTime)
-                    matchedAddress = geocoder.locateAddress(inFormattedAddress,
-                                                            **{"spatialReference": self._spatialRef,
-                                                                "locators": self._locator,
-                                                                "pobox": True})
+                    matchedAddress = geocoder.locateAddress(inFormattedAddress)
 
                     if matchedAddress is None:
                         sequentialBadRequests += 1
