@@ -1,5 +1,6 @@
 import arcpy
 import math
+import sys
 
 if __name__ == '__main__':
     arcpy.ImportToolbox('AGRC Geocode Tools.tbx')
@@ -8,7 +9,7 @@ if __name__ == '__main__':
               "MatchAddress", "Zone", "Score",
               "XCoord", "YCoord")
 
-    results = arcpy.GeocodeTable('AGRC-53509626743181',
+    results = arcpy.GeocodeTable(sys.argv[1],
                                  r'Data\TestData.gdb\AddressTable',
                                  'OBJECTID',
                                  'ADDRESS',

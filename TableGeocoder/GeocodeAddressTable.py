@@ -12,7 +12,7 @@ import time
 import random
 import re
 
-VERSION_NUMBER = "3.0.5"
+VERSION_NUMBER = "3.0.6"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json"
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
@@ -52,9 +52,11 @@ class Geocoder(object):
     _api_key = None
     _url_template = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, spatialReference, locator):
         """Constructor."""
         self._api_key = api_key
+        self._spatialRef = spatialReference
+        self._locator = locator
 
     def _formatJsonData(self, formattedAddresses):
         jsonArray = {"addresses": []}
@@ -86,10 +88,13 @@ class Geocoder(object):
             return "Api key is valid."
 
     @api_retry
-    def locateAddress(self, formattedAddress, **kwargs):
+    def locateAddress(self, formattedAddress):
         """Create URL from formatted address and send to api."""
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
-        params = urllib.urlencode({"apiKey": self._api_key, "pobox": "true"})
+        params = urllib.urlencode({"spatialReference": self._spatialRef,
+                                   "locators": self._locator,
+                                   "apiKey": self._api_key,
+                                   "pobox": "true"})
         url = apiCheck_Url.format(formattedAddress.address, formattedAddress.zone, params)
         try:
             r = urllib.urlopen(url)
@@ -167,7 +172,8 @@ class AddressResult(object):
 
 class AddressFormatter(object):
     """Address formating utility."""
-    spaceReplaceMatcher = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%')
+    spaceReplaceMatcher = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
+
     def __init__(self, idNum, inAddr, inZone):
         """Ctor."""
         self.id = idNum
@@ -198,9 +204,8 @@ class AddressFormatter(object):
         return formattedAddr
 
     def _formatZone(self, inZone):
-        formattedZone = str(inZone)
-
-        if formattedZone[:1] == "8":
+        formattedZone = AddressFormatter.spaceReplaceMatcher.sub(" ", str(inZone)).strip()
+        if len(formattedZone) > 0 and formattedZone[0] == "8":
             formattedZone = formattedZone.strip()[:5]
 
         return formattedZone
@@ -339,7 +344,7 @@ class TableGeocoder(object):
         arcpy.SetProgressor("step", "Geocoder Table Progess".format(increment, self._inputTable),
                             0, record_count, increment)
 
-        geocoder = Geocoder(self._apiKey)
+        geocoder = Geocoder(self._apiKey, self._spatialRef, self._locator)
         # Test api key before we get started
         apiKeyMessage = geocoder.isApiKeyValid()
         if apiKeyMessage is None:
@@ -370,15 +375,12 @@ class TableGeocoder(object):
                 if inFormattedAddress.isValid():
                     throttleTime = random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1])
                     time.sleep(throttleTime)
-                    matchedAddress = geocoder.locateAddress(inFormattedAddress,
-                                                            **{"spatialReference": self._spatialRef,
-                                                                "locators": self._locator,
-                                                                "pobox": True})
+                    matchedAddress = geocoder.locateAddress(inFormattedAddress)
 
                     if matchedAddress is None:
                         sequentialBadRequests += 1
                         if sequentialBadRequests <= 5:
-                            currentResult = AddressResult(row[0], "", "",
+                            currentResult = AddressResult(row[0], inFormattedAddress.address, inFormattedAddress.zone,
                                                           "Error: Geocode failed", "", "", "", "", "")
                             self._HandleCurrentResult(currentResult, outputFullPath, outCursor)
                         else:
