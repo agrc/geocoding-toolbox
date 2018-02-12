@@ -15,5 +15,5 @@ TableGeocoder\AGRC Geocode Tools.tbx
 - Tool box without imported script that will run GeocodeAddressTable.py directly. This tool can be run with GeocodeAddressTableTests.py for a simple test.
 - ArcGIS tool boxes do not accept relative paths. You will need to set the script file property of the tool box with ArcCatalog to the full path of GeocodeAddressTable.py on your machine.
 
-###More information:
+### More information:
 https://gis.utah.gov/data/address-geocoders-locators/#GeocodingToolbox
