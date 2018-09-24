@@ -26,7 +26,9 @@ if __name__ == '__main__':
                 actual_row = actual_cursor.next()
                 total_rows += 1
                 failed = False
+                actual_row = [s.upper() if type(s) is str else s for s in actual_row]
                 act_id, act_inaddr, act_inzone, act_matchaddr, act_zone, act_score, act_x, act_y = actual_row
+                expected_row = [s.upper() if type(s) is str else s for s in actual_row]
                 exp_id, exp_inaddr, exp_inzone, exp_matchaddr, exp_zone, exp_score, exp_x, exp_y = expected_row
 
                 if act_id != exp_id or \

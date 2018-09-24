@@ -12,7 +12,7 @@ import time
 import random
 import re
 
-VERSION_NUMBER = "3.0.6"
+VERSION_NUMBER = "3.0.7"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json"
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
@@ -412,7 +412,7 @@ class TableGeocoder(object):
 
 
 if __name__ == "__main__":
-    apiKey = arcpy.GetParameterAsText(0)
+    apiKey = arcpy.GetParameterAsText(0).strip()
     inputTable = arcpy.GetParameterAsText(1)
     idField = arcpy.GetParameterAsText(2)
     addressField = arcpy.GetParameterAsText(3)
