@@ -13,7 +13,8 @@ import random
 import re
 
 VERSION_NUMBER = "4.0.0"
-VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json"
+BRANCH = "pro-python-3"
+VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}/tool-version.json".format(BRANCH)
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
 
@@ -434,7 +435,7 @@ if __name__ == "__main__":
     currentVersion = get_version(VERSION_CHECK_URL)
     if currentVersion and VERSION_NUMBER != currentVersion:
         arcpy.AddWarning('Current version is: {}'.format(currentVersion))
-        arcpy.AddWarning('Please download at: https://github.com/agrc/geocoding-toolbox/raw/master/AGRC Geocode Tools.tbx')
+        arcpy.AddWarning('Please download at: https://github.com/agrc/geocoding-toolbox/raw/{}/AGRC Geocode Tools.tbx'.format(BRANCH))
     Tool = TableGeocoder(apiKey,
                          inputTable,
                          idField,
