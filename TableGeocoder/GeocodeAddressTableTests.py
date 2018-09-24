@@ -3,20 +3,19 @@ import math
 import sys
 
 if __name__ == '__main__':
-    arcpy.ImportToolbox('AGRC Geocode Tools.tbx')
+    m = arcpy.ImportToolbox('AGRC Geocode Tools.tbx')
     expected_table = r'Data\TestData.gdb\results'
     fields = ("INID", "INADDR", "INZONE",
               "MatchAddress", "Zone", "Score",
               "XCoord", "YCoord")
-
-    results = arcpy.GeocodeTable(sys.argv[1],
-                                 r'Data\TestData.gdb\AddressTable',
-                                 'OBJECTID',
-                                 'ADDRESS',
-                                 'zone',
-                                 'Address points and road centerlines (default)',
-                                 'NAD 1983 UTM Zone 12N',
-                                 r'Data\TestOutput')
+    results = arcpy.GeocodeTable.GeocodeTable(sys.argv[1],
+                                              r'Data\TestData.gdb\AddressTable',
+                                              'OBJECTID',
+                                              'ADDRESS',
+                                              'zone',
+                                              'Address points and road centerlines (default)',
+                                              'NAD 1983 UTM Zone 12N',
+                                              r'Data\TestOutput')
 
     total_rows = 0
     rows_passed = 0
@@ -42,10 +41,10 @@ if __name__ == '__main__':
                             failed = True
 
                 if failed:
-                    print 'Failed:'
-                    print 'Actual:', actual_row
-                    print 'Expected', expected_row
+                    print('Failed:')
+                    print('Actual:', actual_row)
+                    print('Expected', expected_row)
                 else:
                     rows_passed += 1
 
-    print "{} rows passed of {} total_rows".format(rows_passed, total_rows)
+    print("{} rows passed of {} total_rows".format(rows_passed, total_rows))

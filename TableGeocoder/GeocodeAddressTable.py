@@ -12,7 +12,7 @@ import time
 import random
 import re
 
-VERSION_NUMBER = "3.0.7"
+VERSION_NUMBER = "4.0.0"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json"
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
@@ -35,7 +35,7 @@ def api_retry(api_call):
 def get_version(check_url):
     """Get current version number."""
     try:
-        r = urllib.urlopen(check_url)
+        r = urllib.request.urlopen(check_url)
         response = json.load(r)
     except:
         return None
@@ -71,10 +71,11 @@ class Geocoder(object):
     def isApiKeyValid(self):
         """Check api key against known address."""
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
-        params = urllib.urlencode({"apiKey": self._api_key})
-        url = apiCheck_Url.format("270 E CENTER ST", "LINDON", params)
+        params = urllib.parse.urlencode({"apiKey": self._api_key})
+        url = apiCheck_Url.format(urllib.parse.quote("270 E CENTER ST"), "LINDON", params)
+
         try:
-            r = urllib.urlopen(url)
+            r = urllib.request.urlopen(url)
             response = json.load(r)
         except:
             return None
@@ -91,21 +92,26 @@ class Geocoder(object):
     def locateAddress(self, formattedAddress):
         """Create URL from formatted address and send to api."""
         apiCheck_Url = "http://api.mapserv.utah.gov/api/v1/geocode/{}/{}?{}"
-        params = urllib.urlencode({"spatialReference": self._spatialRef,
-                                   "locators": self._locator,
-                                   "apiKey": self._api_key,
-                                   "pobox": "true"})
-        url = apiCheck_Url.format(formattedAddress.address, formattedAddress.zone, params)
+        params = urllib.parse.urlencode({"spatialReference": self._spatialRef,
+                                         "locators": self._locator,
+                                         "apiKey": self._api_key,
+                                         "pobox": "true"})
+        url = apiCheck_Url.format(urllib.parse.quote(formattedAddress.address),
+                                  urllib.parse.quote(formattedAddress.zone),
+                                  params)
+        response = None
         try:
-            r = urllib.urlopen(url)
+            r = urllib.request.urlopen(url)
             response = json.load(r)
+        except urllib.error.HTTPError as error:
+            if error.code >= 500:
+                response = None
+            elif error.code == 404:
+                response = json.load(error)
         except:
-            return None
+            response = None
 
-        if r.getcode() >= 500:
-            return None
-        else:
-            return response
+        return response
 
 
 class AddressResult(object):
