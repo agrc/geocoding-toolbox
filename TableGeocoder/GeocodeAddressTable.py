@@ -1,7 +1,5 @@
 """
 Script tool for ArcGIS which geocodes a table of addresses and produces a new table of the results.
-
-@author: kwalker
 """
 
 import urllib
@@ -13,7 +11,7 @@ import random
 import re
 
 VERSION_NUMBER = "4.0.0"
-BRANCH = "pro-python-3"
+BRANCH = "master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}/tool-version.json".format(BRANCH)
 RATE_LIMIT_SECONDS = (0.1, 0.3)
 UNIQUE_RUN = time.strftime("%Y%m%d%H%M%S")
