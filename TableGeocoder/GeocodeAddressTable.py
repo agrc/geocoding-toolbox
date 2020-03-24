@@ -39,7 +39,7 @@ def get_version(check_url):
     except:
         return None
     if r.getcode() is 200:
-        currentVersion = response['VERSION_NUMBER']
+        currentVersion = response['PRO_VERSION_NUMBER']
         return currentVersion
     else:
         return None
