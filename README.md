@@ -6,6 +6,8 @@ Aftr the tool has completed, you will find a `.csv` and `.fgdb` with the input u
 
 The table can be joined on the unique record identifier to reconnect the results with the original data. The [make xy event layer](https://pro.arcgis.com/en/pro-app/tool-reference/data-management/make-xy-event-layer.htm) tool can be used to create points from the x, y values to spatially view the locations in a map.
 
+ArcMap versions of this tool can be found in the [desktop-python-2](https://github.com/agrc/geocoding-toolbox/tree/desktop-python-2) branch.
+
 ### Build and Install
 
 - `AGRC Geocode Tools.tbx` is the distributable ArcGIS tool box. The tool box script must be exported and then re-imported after any changes to `GeocodeAddressTable.py`
