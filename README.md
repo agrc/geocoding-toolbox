@@ -1,4 +1,4 @@
-# ArcGIS Pro AGRC Web API Geocoding Add-in
+# ArcGIS Pro AGRC Web API Geocoding Toolbox
 
 This custom toolbox created by the AGRC allows ArcGIS users to geocode a table of addresses. The geocoding tool makes use of the [AGRC Web API](https://api.mapserv.utah.gov) to perform the geocoding. A complimentary [api key](https://developer.mapserv.utah.gov) will need to be obtained to run the tool. 
 
@@ -21,4 +21,4 @@ ArcMap versions of this tool can be found in the [desktop-python-2](https://gith
 ### More information
 
 - https://gis.utah.gov/data/address-geocoders-locators/#GeocodingToolbox
-- https://gis.utah.gov/developer/widgets/#arcmap-add-ins
+- https://gis.utah.gov/developer/widgets/#arcgis-extensions
