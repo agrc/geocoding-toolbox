@@ -10,9 +10,9 @@ ArcMap versions of this tool can be found in the [desktop-python-2](https://gith
 
 ### How to use
 
-- Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new API key using your external ip address.
-- Download the current version of the toolbox for [ArcGIS Pro](https://github.com/agrc/geocoding-toolbox/raw/master/AGRC%20Geocode%20Tools.tbx) or [ArcGIS Desktop](https://github.com/agrc/geocoding-toolbox/raw/desktop-python-2/AGRC%20Geocode%20Tools.tbx).
-- Open `AGRC Geocode Tools.tbx` and run the tool.
+1. Download the current version of the toolbox for [ArcGIS Pro](https://github.com/agrc/geocoding-toolbox/raw/master/AGRC%20Geocode%20Tools.tbx) or [ArcGIS Desktop](https://github.com/agrc/geocoding-toolbox/raw/desktop-python-2/AGRC%20Geocode%20Tools.tbx).
+1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new API key using your external ip address.
+1. Open `AGRC Geocode Tools.tbx` and run the tool.
 
 ### Build
 
