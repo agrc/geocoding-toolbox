@@ -2,7 +2,7 @@
 
 This custom toolbox created by the AGRC allows ArcGIS users to geocode a table of addresses. The geocoding tool makes use of the [AGRC Web API](https://api.mapserv.utah.gov) to perform the geocoding. A complimentary [api key](https://developer.mapserv.utah.gov) will need to be obtained to run the tool. 
 
-Aftr the tool has completed, you will find a `.csv` and `.fgdb` with the input unique identifier field, the input address information, and the match results as fields. The file geodatabase table will automatically be added to the current ArcGIS project. 
+After the tool has completed, you will find a `.csv` and `.fgdb` with the input unique identifier field, the input address information, and the match results as fields. The file geodatabase table will automatically be added to the current ArcGIS project. 
 
 The table can be joined on the unique record identifier to reconnect the results with the original data. The [make xy event layer](https://pro.arcgis.com/en/pro-app/tool-reference/data-management/make-xy-event-layer.htm) tool can be used to create points from the x, y values to spatially view the locations in a map.
 
