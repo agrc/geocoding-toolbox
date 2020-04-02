@@ -76,7 +76,11 @@ class Geocoder(object):
         try:
             r = urllib.request.urlopen(url)
             response = json.load(r)
-        except:
+        except urllib.error.HTTPError as e:
+            response = json.load(e)
+
+            return "Error: " + response["message"]
+        except Exception as e:
             return None
 
         # check status code
