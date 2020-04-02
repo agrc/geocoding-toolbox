@@ -28,6 +28,14 @@ There are two versions of the toolbox. `TableGeocoder/AGRC Geocode Tools.tbx` re
 - Tool box without imported script that will run `GeocodeAddressTable.py` directly. This tool can be run with `GeocodeAddressTableTests.py` for a simple test.
 - ArcGIS tool boxes do not accept relative paths. You will need to set the script file property of the tool box with ArcGIS Pro to the full path of `GeocodeAddressTable.py` on your machine.
 
+## Debugging
+
+To debug this tool outside of pro, run the tool like a normal python CLI. The following is a sample.
+
+```sh
+python GeocodeAddressTable.py AGRC-apikey "c:\path\to.csv" "id" "address" "zone" "Address points and road centerlines (default)" "NAD 1983 UTM Zone 12N" "c:\path\to\output\folder"
+```
+
 ## More information
 
 - https://gis.utah.gov/data/address-geocoders-locators/#GeocodingToolbox
