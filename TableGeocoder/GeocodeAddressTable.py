@@ -10,7 +10,7 @@ import time
 import random
 import re
 
-VERSION_NUMBER = "4.0.0"
+VERSION_NUMBER = "4.0.1"
 BRANCH = "master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}/tool-version.json".format(BRANCH)
 RATE_LIMIT_SECONDS = (0.1, 0.3)
