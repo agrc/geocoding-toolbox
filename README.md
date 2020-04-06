@@ -21,6 +21,7 @@ There are two versions of the toolbox. `TableGeocoder/AGRC Geocode Tools.tbx` re
 1. Bump the version numbers in `tool-version.json` and `TableGeocoder/GeocodeAddressTable.py`.
 1. Delete `AGRC Geocode Tools.tbx` (in the root).
 1. Copy `TableGeocoder/AGRC Geocode Tools.tbx` to the root folder.
+1. You may need to fix the path to the script file in the newly copied toolbox tool.
 1. Go to the properties of the `Geocode Table` script tool in the newly copied toolbox and select the "Import Script" checkbox.
 
 ## Testing
