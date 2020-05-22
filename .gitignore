@@ -36,3 +36,5 @@ nosetests.xml
 .pydevproject
 TableGeocoder/TestRunner.py
 TableGeocoder/Data/TestOutput
+
+*.pyt.xml
