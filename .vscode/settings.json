@@ -2,6 +2,7 @@
   "cSpell.words": [
     "isort",
     "pylint",
+    "strftime",
     "yapf"
   ],
   "python.formatting.provider": "yapf",
