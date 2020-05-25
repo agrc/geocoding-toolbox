@@ -1,6 +1,4 @@
 [MASTER]
-# List of plugins (as comma separated values of python modules names) to load,
-# usually to register additional checkers.
 load-plugins=pylint_quotes
-
 max-line-length=120
+disable=bad-continuation

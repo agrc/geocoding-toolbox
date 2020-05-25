@@ -6,6 +6,7 @@ A python toolbox
 # pylint: disable=invalid-name
 
 import arcpy
+import geocode
 
 
 class Toolbox():
@@ -35,8 +36,8 @@ class GeocodeTable():
             name='api_key', displayName='API Key', datatype='GPString', parameterType='Required', direction='Input'
         )
         table_parameter = arcpy.Parameter(
-            name='address_table',
-            displayName='Address Table',
+            name='input_table',
+            displayName='Input Table',
             datatype='GPTableView',
             parameterType='Required',
             direction='Input'
@@ -60,7 +61,6 @@ class GeocodeTable():
         )
         zone_field_parameter.parameterDependencies = [table_parameter.name]
 
-        default_locator_name = 'Address points and road centerlines (default)'
         locator_parameter = arcpy.Parameter(
             name='locator',
             displayName='Locator',
@@ -69,8 +69,8 @@ class GeocodeTable():
             direction='Input',
         )
         locator_parameter.filter.type = 'ValueList'
-        locator_parameter.filter.list = [default_locator_name, 'Road centerlines', 'Address points']
-        locator_parameter.value = default_locator_name
+        locator_parameter.filter.list = [geocode.DEFAULT_LOCATOR_NAME, 'Road centerlines', 'Address points']
+        locator_parameter.value = geocode.DEFAULT_LOCATOR_NAME
 
         spatial_reference_parameter = arcpy.Parameter(
             name='spatial_reference',
