@@ -1,4 +1,4 @@
 [MASTER]
 load-plugins=pylint_quotes
 max-line-length=120
-disable=bad-continuation
+disable=bad-continuation,broad-except
