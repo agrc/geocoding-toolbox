@@ -61,6 +61,14 @@ class GeocodeTable():
         )
         zone_field_parameter.parameterDependencies = [table_parameter.name]
 
+        output_directory_parameter = arcpy.Parameter(
+            name='output_directory',
+            displayName='Output Directory',
+            datatype='DEWorkspace',
+            parameterType='Required',
+            direction='Input'
+        )
+
         locator_parameter = arcpy.Parameter(
             name='locator',
             displayName='Locator',
@@ -81,14 +89,6 @@ class GeocodeTable():
         )
         spatial_reference_parameter.value = arcpy.SpatialReference(26912)
 
-        output_directory_parameter = arcpy.Parameter(
-            name='output_directory',
-            displayName='Output Directory',
-            datatype='DEWorkspace',
-            parameterType='Required',
-            direction='Input'
-        )
-
         output_csv_parameter = arcpy.Parameter(
             name='output_csv',
             displayName='Output CSV',
@@ -99,10 +99,14 @@ class GeocodeTable():
 
         return [
             api_key_parameter, table_parameter, id_field_parameter, address_field_parameter, zone_field_parameter,
-            locator_parameter, spatial_reference_parameter, output_directory_parameter, output_csv_parameter
+            output_directory_parameter, locator_parameter, spatial_reference_parameter, output_csv_parameter
         ]
 
     def execute(self, parameters, messages):
-        """The source code of the tool.
+        """pass parameters to main geocoding module and set output csv parameter
         """
-        return
+        output_table = geocode.execute(
+            *[parameter.valueAsText for parameter in parameters[:-1]], add_message=messages.addMessage
+        )
+
+        parameters[-1].value = str(output_table)
