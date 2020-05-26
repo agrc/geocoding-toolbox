@@ -116,6 +116,16 @@ def execute(
     score = 0
     total = 0
 
+    add_message(f'api_key: {api_key}')
+    add_message(f'input_table: {input_table}')
+    add_message(f'id_field: {id_field}')
+    add_message(f'address_field: {address_field}')
+    add_message(f'zone_field: {zone_field}')
+    add_message(f'output_directory: {output_directory}')
+    add_message(f'spatial_reference: {spatial_reference}')
+    add_message(f'locator: {locator}')
+    add_message(f'ignore_failure: {ignore_failure}')
+
     def log_status():
         try:
             failure_rate = 100 * fail / total
@@ -125,6 +135,7 @@ def execute(
             average_score = round(score / success)
         except ZeroDivisionError:
             average_score = 'n/a'
+
         add_message(f'Total requests: {total}')
         add_message(f'Failure rate: {failure_rate}%')
         add_message(f'Average score: {average_score}')
@@ -145,9 +156,6 @@ def execute(
 
         start = time.perf_counter()
         for primary_key, street, zone in cursor:
-            # if options['--testing'].lower() == 'true' and total > 50:
-            #     return 'result.csv'
-
             if not ignore_failure and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
                 add_message('passed continuous fail threshold. failing entire job.')
 
@@ -200,6 +208,7 @@ def execute(
                 fail += 1
                 total += 1
 
+                add_message(f'Failure on row: {primary_key} with {street}, {zone}')
                 writer.writerow((primary_key, street, zone, 0, 0, 0, str(ex)[:500]))
 
             if total % 10000 == 0:
