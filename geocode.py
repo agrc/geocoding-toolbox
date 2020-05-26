@@ -3,17 +3,7 @@
 """
 Tools for geocoding addresses using AGRC's geocoding web service.
 
-Arguments:
-    api_key
-    input_table
-    id_field
-    address_field
-    zone_field
-    output_directory
-
-Optional Arguments:
-    spatial_reference
-    locator
+CLI usage: `python geocode.py --help`.
 """
 
 import csv
@@ -24,8 +14,6 @@ from pathlib import Path
 from string import Template
 
 import requests
-
-import arcpy
 
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
@@ -97,17 +85,22 @@ def format_time(seconds):
 
 def execute(
     api_key,
-    input_table,
-    id_field,
-    address_field,
-    zone_field,
+    rows,
     output_directory,
     spatial_reference=DEFAULT_SPATIAL_REFERENCE,
-    locator=DEFAULT_LOCATOR_NAME,
+    locators=DEFAULT_LOCATOR_NAME,
     add_message=print,
-    ignore_failure=False
+    ignore_failures=False
 ):
-    """the main geocoding function
+    """Geocode an iterator of data.
+
+    api_key           = string
+    rows              = iterator of rows in this form: (primary_key, street, zone)
+    output_directory  = path to directory that you would like the output csv created in
+    spatial_reference = wkid for any Esri-supported spatial reference
+    locator           = determines what locators are used ('all', 'roadCenterlines', or 'addressPoints')
+    add_message       = the function that log messages are sent to
+    ignore_failure    = used to ignore the short-circut on multiple subsequent failures at the beginning of the job
     """
     url_template = Template(f'https://{HOST}/api/v1/geocode/$street/$zone')
     sequential_fails = 0
@@ -117,14 +110,10 @@ def execute(
     total = 0
 
     add_message(f'api_key: {api_key}')
-    add_message(f'input_table: {input_table}')
-    add_message(f'id_field: {id_field}')
-    add_message(f'address_field: {address_field}')
-    add_message(f'zone_field: {zone_field}')
     add_message(f'output_directory: {output_directory}')
     add_message(f'spatial_reference: {spatial_reference}')
-    add_message(f'locator: {locator}')
-    add_message(f'ignore_failure: {ignore_failure}')
+    add_message(f'locators: {locators}')
+    add_message(f'ignore_failures: {ignore_failures}')
 
     def log_status():
         try:
@@ -142,21 +131,18 @@ def execute(
         add_message(f'Time taken: {format_time(time.perf_counter() - start)}')
 
     #: convert strings to path objects
-    input_table = Path(input_table)
     output_directory = Path(output_directory)
 
-    add_message(f'executing geocode job on {input_table.name}')
     output_table = output_directory / f'geocoding_results_{UNIQUE_RUN}.csv'
 
-    fields = [id_field, address_field, zone_field]
-    with arcpy.da.SearchCursor(str(input_table), fields) as cursor, open(output_table, 'w', newline='') as result_file:
+    with open(output_table, 'w+', newline='') as result_file:
         writer = csv.writer(result_file)
 
         writer.writerow(HEADER)
 
         start = time.perf_counter()
-        for primary_key, street, zone in cursor:
-            if not ignore_failure and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
+        for primary_key, street, zone in rows:
+            if not ignore_failures and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
                 add_message('passed continuous fail threshold. failing entire job.')
 
                 return None
@@ -172,7 +158,7 @@ def execute(
                     params={
                         'apiKey': api_key,
                         'spatialReference': spatial_reference,
-                        'locators': locator
+                        'locators': locators
                     }
                 )
 
@@ -234,9 +220,35 @@ class InvalidAPIKeyException(Exception):
 
 
 if __name__ == '__main__':
-    #: I'm purposefully not using something like docopt here since I don't want to make
-    #: Pro users install any 3rd party modules.
-    from sys import argv
+    import argparse
+    parser = argparse.ArgumentParser(description='Geocode a csv')
 
-    #: temporary fix for https://github.com/PyCQA/pylint/issues/2820
-    execute(*argv[1:])  # pylint: disable=no-value-for-parameter
+    parser.add_argument('key', type=str)
+    parser.add_argument('csv', type=str)
+    parser.add_argument('id', type=str)
+    parser.add_argument('street', type=str)
+    parser.add_argument('zone', type=str)
+    parser.add_argument('output', type=str)
+    parser.add_argument('--wkid', default=26912, type=int, action='store')
+    parser.add_argument('--locators', default='all', type=str, action='store')
+    parser.add_argument('--ignore-failures', action='store_true')
+
+    args = parser.parse_args()
+
+    def get_rows():
+        """open csv and yield data for geocoding
+        """
+        with open(args.csv) as input_file:
+            reader = csv.DictReader(input_file)
+            for row in reader:
+                yield (row[args.id], row[args.street], row[args.zone])
+
+    execute(
+        args.key,
+        get_rows(),
+        args.output,
+        spatial_reference=args.wkid,
+        locators=args.locators,
+        add_message=print,
+        ignore_failures=args.ignore_failures
+    )

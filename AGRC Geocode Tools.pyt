@@ -115,20 +115,22 @@ class GeocodeTable():
     def execute(self, parameters, messages):
         """pass parameters to main geocoding module and set output csv parameter
         """
-        parameter_values = []
+        api_key_parameter, table_parameter, id_field_parameter, address_field_parameter, zone_field_parameter, \
+            output_directory_parameter, spatial_reference_parameter, locator_parameter, \
+                output_csv_parameter = parameters
 
-        #: skip last parameter because it's the output parameter
-        for parameter in parameters[:-1]:
-            if parameter.name == 'spatial_reference':
-                value = str(parameter.value.factoryCode)
-            elif parameter.name == 'locator':
-                value = LOCATORS[parameter.valueAsText]
-            else:
-                value = parameter.valueAsText
+        wkid = str(spatial_reference_parameter.value.factoryCode)
+        locators = LOCATORS[locator_parameter.valueAsText]
 
-            parameter_values.append(value)
+        fields = [id_field_parameter.valueAsText, address_field_parameter.valueAsText, zone_field_parameter.valueAsText]
+        rows = arcpy.da.SearchCursor(table_parameter.valueAsText, fields)
+        output_table = geocode.execute(
+            api_key_parameter.valueAsText,
+            rows,
+            output_directory_parameter.valueAsText,
+            wkid,
+            locators,
+            add_message=messages.addMessage
+        )
 
-        #: temporary fix for https://github.com/PyCQA/pylint/issues/2820
-        output_table = geocode.execute(*parameter_values, add_message=messages.addMessage)  # pylint: disable=no-value-for-parameter
-
-        parameters[-1].value = str(output_table)
+        output_csv_parameter.value = str(output_table)
