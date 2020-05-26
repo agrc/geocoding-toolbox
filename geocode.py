@@ -26,7 +26,7 @@ UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 HEALTH_PROB_COUNT = 25
 
 
-def cleanse_address(data):
+def _cleanse_street(data):
     """cleans up address garbage
     """
     replacement = ' '
@@ -53,7 +53,7 @@ def cleanse_address(data):
     return street.strip()
 
 
-def cleanse_zone(data):
+def _cleanse_zone(data):
     """cleans up zone garbage
     """
     zone = SPACES.sub(' ', str(data)).strip()
@@ -64,7 +64,7 @@ def cleanse_zone(data):
     return zone
 
 
-def format_time(seconds):
+def _format_time(seconds):
     """seconds: number
     returns a human-friendly string describing the amount of time
     """
@@ -128,7 +128,7 @@ def execute(
         add_message(f'Total requests: {total}')
         add_message(f'Failure rate: {failure_rate}%')
         add_message(f'Average score: {average_score}')
-        add_message(f'Time taken: {format_time(time.perf_counter() - start)}')
+        add_message(f'Time taken: {_format_time(time.perf_counter() - start)}')
 
     #: convert strings to path objects
     output_directory = Path(output_directory)
@@ -147,7 +147,7 @@ def execute(
 
                 return None
 
-            url = url_template.substitute({'street': street, 'zone': zone})
+            url = url_template.substitute({'street': _cleanse_street(street), 'zone': _cleanse_zone(zone)})
 
             time.sleep(random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1]))
 
