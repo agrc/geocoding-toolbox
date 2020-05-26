@@ -117,7 +117,7 @@ def execute(
 
     def log_status():
         try:
-            failure_rate = 100 * fail / total
+            failure_rate = round(100 * fail / total)
         except ZeroDivisionError:
             failure_rate = 100
         try:
