@@ -35,6 +35,7 @@ RATE_LIMIT_SECONDS = (0.015, 0.03)
 HOST = 'api.mapserv.utah.gov'
 HEADER = ('primary_key', 'input_address', 'input_zone', 'score', 'x', 'y', 'message')
 UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
+HEALTH_PROB_COUNT = 25
 
 
 def cleanse_address(data):
@@ -147,7 +148,7 @@ def execute(
             # if options['--testing'].lower() == 'true' and total > 50:
             #     return 'result.csv'
 
-            if not ignore_failure and sequential_fails > 25:
+            if not ignore_failure and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
                 add_message('passed continuous fail threshold. failing entire job.')
 
                 return None
