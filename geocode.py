@@ -28,7 +28,7 @@ import requests
 import arcpy
 
 DEFAULT_SPATIAL_REFERENCE = 26912
-DEFAULT_LOCATOR_NAME = 'Address points and road centerlines (default)'
+DEFAULT_LOCATOR_NAME = 'all'
 HEADER = ('primary_key', 'input_address', 'input_zone', 'score', 'x', 'y', 'message')
 SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
@@ -158,9 +158,12 @@ def execute(
 
             try:
                 request = requests.get(
-                    url, timeout=5, params={
+                    url,
+                    timeout=5,
+                    params={
                         'apiKey': api_key,
-                        'spatialReference': spatial_reference
+                        'spatialReference': spatial_reference,
+                        'locators': locator
                     }
                 )
 

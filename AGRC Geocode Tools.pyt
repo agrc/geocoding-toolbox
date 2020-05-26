@@ -8,6 +8,16 @@ A python toolbox
 import arcpy
 import geocode
 
+#: to force refresh of the module in ArcGIS Pro - for development only
+# import importlib  # isort:skip
+# importlib.reload(geocode)
+
+LOCATORS = {
+    'Address points and road centerlines': 'all',
+    'Road centerlines': 'roadCenterlines',
+    'Address points': 'addressPoints'
+}
+
 
 class Toolbox():
     """Esri Python Toolbox
@@ -69,6 +79,15 @@ class GeocodeTable():
             direction='Input'
         )
 
+        spatial_reference_parameter = arcpy.Parameter(
+            name='spatial_reference',
+            displayName='Spatial Reference',
+            datatype='GPSpatialReference',
+            parameterType='Required',
+            direction='Input'
+        )
+        spatial_reference_parameter.value = arcpy.SpatialReference(geocode.DEFAULT_SPATIAL_REFERENCE)
+
         locator_parameter = arcpy.Parameter(
             name='locator',
             displayName='Locator',
@@ -77,17 +96,8 @@ class GeocodeTable():
             direction='Input',
         )
         locator_parameter.filter.type = 'ValueList'
-        locator_parameter.filter.list = [geocode.DEFAULT_LOCATOR_NAME, 'Road centerlines', 'Address points']
+        locator_parameter.filter.list = list(LOCATORS.keys())
         locator_parameter.value = geocode.DEFAULT_LOCATOR_NAME
-
-        spatial_reference_parameter = arcpy.Parameter(
-            name='spatial_reference',
-            displayName='Spatial Reference',
-            datatype='GPSpatialReference',
-            parameterType='Required',
-            direction='Input'
-        )
-        spatial_reference_parameter.value = arcpy.SpatialReference(26912)
 
         output_csv_parameter = arcpy.Parameter(
             name='output_csv',
@@ -99,7 +109,7 @@ class GeocodeTable():
 
         return [
             api_key_parameter, table_parameter, id_field_parameter, address_field_parameter, zone_field_parameter,
-            output_directory_parameter, locator_parameter, spatial_reference_parameter, output_csv_parameter
+            output_directory_parameter, spatial_reference_parameter, locator_parameter, output_csv_parameter
         ]
 
     def execute(self, parameters, messages):
@@ -110,12 +120,15 @@ class GeocodeTable():
         #: skip last parameter because it's the output parameter
         for parameter in parameters[:-1]:
             if parameter.name == 'spatial_reference':
-                value = parameter.value.factoryCode
+                value = str(parameter.value.factoryCode)
+            elif parameter.name == 'locator':
+                value = LOCATORS[parameter.valueAsText]
             else:
                 value = parameter.valueAsText
 
             parameter_values.append(value)
 
-        output_table = geocode.execute(*parameter_values, add_message=messages.addMessage)
+        #: temporary fix for https://github.com/PyCQA/pylint/issues/2820
+        output_table = geocode.execute(*parameter_values, add_message=messages.addMessage)  # pylint: disable=no-value-for-parameter
 
         parameters[-1].value = str(output_table)
