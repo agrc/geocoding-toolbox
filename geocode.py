@@ -170,7 +170,10 @@ def execute(
 
                 response = request.json()
 
-                if request.status_code != 200:
+                if request.status_code == 400:
+                    #: fail fast with api key auth
+                    raise InvalidAPIKeyException(total, primary_key, response['message'])
+                elif request.status_code != 200:
                     fail += 1
                     total += 1
                     sequential_fails += 1
@@ -191,6 +194,8 @@ def execute(
                 score += match_score
 
                 writer.writerow((primary_key, street, zone, match_score, match_x, match_y, None))
+            except InvalidAPIKeyException as ex:
+                raise ex
             except Exception as ex:
                 fail += 1
                 total += 1
@@ -205,6 +210,18 @@ def execute(
         log_status()
 
     return output_table
+
+
+class InvalidAPIKeyException(Exception):
+    """Custom exception for invalid API key returned from api
+    """
+
+    def __init__(self, total, primary_key, message):
+        self.total = total
+        self.primary_key = primary_key
+        self.message = f'\n\nError returned for primary_key: {primary_key}\n' \
+            f'API response message:{message}\nTotal rows processed: {total}'
+        super().__init__(self.message)
 
 
 if __name__ == '__main__':
