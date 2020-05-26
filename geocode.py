@@ -14,6 +14,8 @@ from pathlib import Path
 from string import Template
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
@@ -83,6 +85,28 @@ def _format_time(seconds):
     return '{} hours'.format(round(seconds / hour, 2))
 
 
+def _get_retry_session():
+    """create a requests session that has a retry built into it
+    """
+    retries = 3
+    backoff_factor = 0.3
+    status_forcelist = (500, 502, 504, 400)
+
+    session = requests.Session()
+    session.headers.update({'x-client': 'geocoding-toolbox'})
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('https://', adapter)
+
+    return session
+
+
 def execute(
     api_key,
     rows,
@@ -141,6 +165,8 @@ def execute(
         writer.writerow(HEADER)
 
         start = time.perf_counter()
+
+        session = _get_retry_session()
         for primary_key, street, zone in rows:
             if not ignore_failures and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
                 add_message('passed continuous fail threshold. failing entire job.')
@@ -152,7 +178,7 @@ def execute(
             time.sleep(random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1]))
 
             try:
-                request = requests.get(
+                request = session.get(
                     url,
                     timeout=5,
                     params={
