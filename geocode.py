@@ -90,7 +90,7 @@ def _get_retry_session():
     """
     retries = 3
     backoff_factor = 0.3
-    status_forcelist = (500, 502, 504, 400)
+    status_forcelist = (500, 502, 504)
 
     session = requests.Session()
     session.headers.update({'x-client': 'geocoding-toolbox'})
