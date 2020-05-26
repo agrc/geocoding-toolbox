@@ -97,7 +97,7 @@ class GeocodeTable():
         )
         locator_parameter.filter.type = 'ValueList'
         locator_parameter.filter.list = list(LOCATORS.keys())
-        locator_parameter.value = geocode.DEFAULT_LOCATOR_NAME
+        locator_parameter.value = list(LOCATORS.keys())[0]
 
         output_csv_parameter = arcpy.Parameter(
             name='output_csv',
