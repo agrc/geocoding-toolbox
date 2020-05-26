@@ -5,6 +5,11 @@ A python toolbox
 """
 # pylint: disable=invalid-name
 
+import json
+from pathlib import Path
+
+import requests
+
 import arcpy
 import geocode
 
@@ -17,6 +22,18 @@ LOCATORS = {
     'Road centerlines': 'roadCenterlines',
     'Address points': 'addressPoints'
 }
+BRANCH = 'master'
+VERSION_JSON_FILE = 'tool-version.json'
+VERSION_CHECK_URL = f'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{BRANCH}/{VERSION_JSON_FILE}'
+
+
+def _get_latest_version(check_url):
+    """Get current version number
+    """
+    response = requests.get(check_url)
+    response_json = response.json()
+
+    return response_json['PRO_VERSION_NUMBER']
 
 
 class Toolbox():
@@ -118,6 +135,22 @@ class GeocodeTable():
         api_key_parameter, table_parameter, id_field_parameter, address_field_parameter, zone_field_parameter, \
             output_directory_parameter, spatial_reference_parameter, locator_parameter, \
                 output_csv_parameter = parameters
+
+        with open(Path(__file__).resolve().parent / VERSION_JSON_FILE) as version_file:
+            version_json = json.load(version_file)
+            currentVersion = version_json['PRO_VERSION_NUMBER']
+
+        messages.addMessage(f'Current version: {currentVersion}')
+        try:
+            latestVersion = _get_latest_version(VERSION_CHECK_URL)
+
+            if latestVersion and currentVersion != latestVersion:
+                messages.addWarningMessage(f'Latest version is: {latestVersion}')
+                messages.addWarningMessage(
+                    f'Please download at: https://github.com/agrc/geocoding-toolbox/raw/{BRANCH}/AGRC Geocode Tools.zip'
+                )
+        except Exception:
+            messages.addWarningMessage('GitHub request for latest version failed')
 
         wkid = str(spatial_reference_parameter.value.factoryCode)
         locators = LOCATORS[locator_parameter.valueAsText]
