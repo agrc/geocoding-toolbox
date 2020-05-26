@@ -10,6 +10,7 @@ import csv
 import random
 import re
 import time
+from json.decoder import JSONDecodeError
 from pathlib import Path
 from string import Template
 
@@ -19,11 +20,13 @@ from urllib3.util.retry import Retry
 
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
-HEADER = ('primary_key', 'input_address', 'input_zone', 'score', 'x', 'y', 'message')
 SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
 HOST = 'api.mapserv.utah.gov'
-HEADER = ('primary_key', 'input_address', 'input_zone', 'score', 'x', 'y', 'message')
+HEADER = (
+    'primary_key', 'input_street', 'input_zone', 'x', 'y', 'score', 'locator', 'matchAddress', 'standardizedAddress',
+    'addressGrid', 'message'
+)
 UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 HEALTH_PROB_COUNT = 25
 
@@ -167,9 +170,19 @@ def execute(
         start = time.perf_counter()
 
         session = _get_retry_session()
+
+        def write_error(primary_key, street, zone, error_message):
+            nonlocal fail, total
+            writer.writerow((primary_key, street, zone, 0, 0, 0, None, None, None, None, error_message))
+
+            fail += 1
+            total += 1
+
+            add_message(f'Failure on row: {primary_key} with {street}, {zone}\n{error_message}')
+
         for primary_key, street, zone in rows:
             if not ignore_failures and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
-                add_message('passed continuous fail threshold. failing entire job.')
+                add_message('Continuous fail threshold reached. Failing entire job.')
 
                 return None
 
@@ -188,23 +201,30 @@ def execute(
                     }
                 )
 
-                response = request.json()
+                try:
+                    response = request.json()
+                except JSONDecodeError:
+                    write_error(primary_key, street, zone, f'Missing required parameters for URL: {request.url}')
+
+                    continue
 
                 if request.status_code == 400:
                     #: fail fast with api key auth
                     raise InvalidAPIKeyException(total, primary_key, response['message'])
                 elif request.status_code != 200:
-                    fail += 1
-                    total += 1
                     sequential_fails += 1
 
-                    writer.writerow((primary_key, street, zone, 0, 0, 0, response['message']))
+                    write_error(primary_key, street, zone, response['message'])
 
                     continue
 
                 match = response['result']
                 match_score = match['score']
                 location = match['location']
+                match_address = match['matchAddress']
+                standardized_address = match['standardizedAddress']
+                address_grid = match['addressGrid']
+
                 match_x = location['x']
                 match_y = location['y']
 
@@ -213,15 +233,14 @@ def execute(
                 total += 1
                 score += match_score
 
-                writer.writerow((primary_key, street, zone, match_score, match_x, match_y, None))
+                writer.writerow((
+                    primary_key, street, zone, match_score, match_address, standardized_address, address_grid, match_x,
+                    match_y, None
+                ))
             except InvalidAPIKeyException as ex:
                 raise ex
             except Exception as ex:
-                fail += 1
-                total += 1
-
-                add_message(f'Failure on row: {primary_key} with {street}, {zone}')
-                writer.writerow((primary_key, street, zone, 0, 0, 0, str(ex)[:500]))
+                write_error(primary_key, street, zone, str(ex)[:500])
 
             if total % 10000 == 0:
                 log_status()
