@@ -105,8 +105,17 @@ class GeocodeTable():
     def execute(self, parameters, messages):
         """pass parameters to main geocoding module and set output csv parameter
         """
-        output_table = geocode.execute(
-            *[parameter.valueAsText for parameter in parameters[:-1]], add_message=messages.addMessage
-        )
+        parameter_values = []
+
+        #: skip last parameter because it's the output parameter
+        for parameter in parameters[:-1]:
+            if parameter.name == 'spatial_reference':
+                value = parameter.value.factoryCode
+            else:
+                value = parameter.valueAsText
+
+            parameter_values.append(value)
+
+        output_table = geocode.execute(*parameter_values, add_message=messages.addMessage)
 
         parameters[-1].value = str(output_table)

@@ -12,8 +12,8 @@ Arguments:
     output_directory
 
 Optional Arguments:
-    locator
     spatial_reference
+    locator
 """
 
 import csv
@@ -27,8 +27,8 @@ import requests
 
 import arcpy
 
+DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'Address points and road centerlines (default)'
-DEFAULT_SPATIAL_REFERENCE = arcpy.SpatialReference(26912)
 HEADER = ('primary_key', 'input_address', 'input_zone', 'score', 'x', 'y', 'message')
 SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
@@ -101,8 +101,8 @@ def execute(
     address_field,
     zone_field,
     output_directory,
-    locator=DEFAULT_LOCATOR_NAME,
     spatial_reference=DEFAULT_SPATIAL_REFERENCE,
+    locator=DEFAULT_LOCATOR_NAME,
     add_message=print,
     ignore_failure=False
 ):
@@ -157,7 +157,12 @@ def execute(
             time.sleep(random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1]))
 
             try:
-                request = requests.get(url, timeout=5, params={'apiKey': api_key})
+                request = requests.get(
+                    url, timeout=5, params={
+                        'apiKey': api_key,
+                        'spatialReference': spatial_reference
+                    }
+                )
 
                 response = request.json()
 
