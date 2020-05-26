@@ -60,17 +60,25 @@ class GeocodeTable():
         """
 
         api_key_parameter = arcpy.Parameter(
-            name='api_key', displayName='API Key', datatype='GPString', parameterType='Required', direction='Input'
+            name='api_key',
+            displayName='API Key',
+            datatype='GPString',
+            parameterType='Required',
+            direction='Input',
         )
         table_parameter = arcpy.Parameter(
             name='input_table',
             displayName='Input Table',
             datatype='GPTableView',
             parameterType='Required',
-            direction='Input'
+            direction='Input',
         )
         id_field_parameter = arcpy.Parameter(
-            name='id_field', displayName='ID Field', datatype='Field', parameterType='Required', direction='Input'
+            name='id_field',
+            displayName='ID Field',
+            datatype='Field',
+            parameterType='Required',
+            direction='Input',
         )
         id_field_parameter.parameterDependencies = [table_parameter.name]
 
@@ -79,12 +87,16 @@ class GeocodeTable():
             displayName='Address Field',
             datatype='Field',
             parameterType='Required',
-            direction='Input'
+            direction='Input',
         )
         address_field_parameter.parameterDependencies = [table_parameter.name]
 
         zone_field_parameter = arcpy.Parameter(
-            name='zone_field', displayName='Zone Field', datatype='Field', parameterType='Required', direction='Input'
+            name='zone_field',
+            displayName='Zone Field',
+            datatype='Field',
+            parameterType='Required',
+            direction='Input',
         )
         zone_field_parameter.parameterDependencies = [table_parameter.name]
 
@@ -93,7 +105,7 @@ class GeocodeTable():
             displayName='Output Directory',
             datatype='DEWorkspace',
             parameterType='Required',
-            direction='Input'
+            direction='Input',
         )
 
         spatial_reference_parameter = arcpy.Parameter(
@@ -101,7 +113,7 @@ class GeocodeTable():
             displayName='Spatial Reference',
             datatype='GPSpatialReference',
             parameterType='Required',
-            direction='Input'
+            direction='Input',
         )
         spatial_reference_parameter.value = arcpy.SpatialReference(geocode.DEFAULT_SPATIAL_REFERENCE)
 
@@ -121,7 +133,7 @@ class GeocodeTable():
             displayName='Output CSV',
             datatype='DETable',
             parameterType='Derived',
-            direction='Output'
+            direction='Output',
         )
 
         return [
