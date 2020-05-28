@@ -157,9 +157,10 @@ class GeocodeTable():
             latestVersion = _get_latest_version(VERSION_CHECK_URL)
 
             if latestVersion and currentVersion != latestVersion:
-                messages.addWarningMessage(f'Latest version is: {latestVersion}')
                 messages.addWarningMessage(
-                    f'Please download at: https://github.com/agrc/geocoding-toolbox/raw/{BRANCH}/AGRC Geocode Tools.zip'
+                    'There is a new version of this tool available!\n' +
+                    'Please download at: https://github.com/agrc/geocoding-toolbox/\n' +
+                    f'Latest version: {latestVersion}. \nYour version: {currentVersion}'
                 )
         except Exception:
             messages.addWarningMessage('GitHub request for latest version failed')
