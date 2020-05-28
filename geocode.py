@@ -6,12 +6,12 @@ Tools for geocoding addresses using AGRC's geocoding web service.
 CLI usage: `python geocode.py --help`.
 """
 
+import os
 import csv
 import random
 import re
 import time
 from json.decoder import JSONDecodeError
-from pathlib import Path
 from string import Template
 
 import requests
@@ -157,10 +157,7 @@ def execute(
         add_message('Average score: {}'.format(average_score))
         add_message('Time taken: {}'.format(_format_time(time.perf_counter() - start)))
 
-    #: convert strings to path objects
-    output_directory = Path(output_directory)
-
-    output_table = output_directory / f'geocoding_results_{UNIQUE_RUN}.csv'
+    output_table = os.path.join(output_directory, 'geocoding_results_{}.csv'.format(UNIQUE_RUN))
 
     with open(output_table, 'w+', newline='') as result_file:
         writer = csv.writer(result_file)

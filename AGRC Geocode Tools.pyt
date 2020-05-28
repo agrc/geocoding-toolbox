@@ -6,7 +6,7 @@ A python toolbox
 # pylint: disable=invalid-name
 
 import json
-from pathlib import Path
+import os
 
 import requests
 
@@ -148,7 +148,7 @@ class GeocodeTable():
             output_directory_parameter, spatial_reference_parameter, locator_parameter, \
                 output_csv_parameter = parameters
 
-        with open(Path(__file__).resolve().parent / VERSION_JSON_FILE) as version_file:
+        with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), VERSION_JSON_FILE)) as version_file:
             version_json = json.load(version_file)
             currentVersion = version_json['VERSION_NUMBER']
 
