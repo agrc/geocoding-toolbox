@@ -188,14 +188,15 @@ def execute(
             time.sleep(random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1]))
 
             try:
-                request = session.get(
+                request = requests.get(
                     url,
                     timeout=5,
                     params={
                         'apiKey': api_key,
                         'spatialReference': spatial_reference,
                         'locators': locators
-                    }
+                    },
+                    headers={'x-client': 'geocoding-toolbox-py-2'}
                 )
 
                 try:
