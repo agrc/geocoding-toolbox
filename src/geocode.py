@@ -10,10 +10,10 @@ import os
 from __future__ import print_function
 
 import csv
+import json
 import random
 import re
 import time
-from json.decoder import JSONDecodeError
 from string import Template
 
 import requests
@@ -178,12 +178,15 @@ def execute(
 
                 try:
                     response = request.json()
-                except JSONDecodeError:
-                    write_error(
-                        primary_key, street, zone, 'Missing required parameters for URL: {}'.format(request.url)
-                    )
+                except ValueError as ex:
+                    if ex.message == 'No JSON object could be decoded':
+                        write_error(
+                            primary_key, street, zone, 'Missing required parameters for URL: {}'.format(request.url)
+                        )
 
-                    continue
+                        continue
+
+                    raise ex
 
                 if request.status_code == 400:
                     #: fail fast with api key auth
