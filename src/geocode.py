@@ -29,7 +29,7 @@ HEADER = (
     'addressGrid', 'message'
 )
 UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
-HEALTH_PROB_COUNT = 25
+HEALTH_PROBE_COUNT = 25
 
 
 def _cleanse_street(data):
@@ -153,7 +153,7 @@ def execute(
             add_message('Failure on row: {} with {}, {}\n{}'.format(primary_key, street, zone, error_message))
 
         for primary_key, street, zone in rows:
-            if not ignore_failures and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
+            if not ignore_failures and stats['total'] == HEALTH_PROBE_COUNT and sequential_fails == HEALTH_PROBE_COUNT:
                 add_message('Continuous fail threshold reached. Failing entire job.')
 
                 return None
