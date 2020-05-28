@@ -16,7 +16,6 @@ from string import Template
 
 import requests
 from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
@@ -88,28 +87,6 @@ def _format_time(seconds):
     return '{} hours'.format(round(seconds / hour, 2))
 
 
-def _get_retry_session():
-    """create a requests session that has a retry built into it
-    """
-    retries = 3
-    backoff_factor = 0.3
-    status_forcelist = (500, 502, 504)
-
-    session = requests.Session()
-    session.headers.update({'x-client': 'geocoding-toolbox'})
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('https://', adapter)
-
-    return session
-
-
 def execute(
     api_key,
     rows,
@@ -165,8 +142,6 @@ def execute(
         writer.writerow(HEADER)
 
         start = time.perf_counter()
-
-        session = _get_retry_session()
 
         def write_error(primary_key, street, zone, error_message):
             nonlocal fail, total
