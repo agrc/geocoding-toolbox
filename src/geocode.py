@@ -133,7 +133,7 @@ def execute(
         add_message('Total requests: {}'.format(stats['total']))
         add_message('Failure rate: {}%'.format(failure_rate))
         add_message('Average score: {}'.format(average_score))
-        add_message('Time taken: {}'.format(_format_time(time.perf_counter() - start)))
+        add_message('Time taken: {}'.format(_format_time(time.clock() - start)))
 
     output_table = os.path.join(output_directory, 'geocoding_results_{}.csv'.format(UNIQUE_RUN))
 
@@ -142,7 +142,7 @@ def execute(
 
         writer.writerow(HEADER)
 
-        start = time.perf_counter()
+        start = time.clock()
 
         def write_error(primary_key, street, zone, error_message):
             writer.writerow((primary_key, street, zone, 0, 0, 0, None, None, None, None, error_message))
@@ -222,7 +222,7 @@ def execute(
 
             if stats['total'] % 10000 == 0:
                 log_status()
-                start = time.perf_counter()
+                start = time.clock()
 
         add_message('Job Completed')
         log_status()
