@@ -22,7 +22,7 @@ LOCATORS = {
     'Road centerlines': 'roadCenterlines',
     'Address points': 'addressPoints'
 }
-BRANCH = 'master'
+BRANCH = 'py-2'
 VERSION_JSON_FILE = 'tool-version.json'
 VERSION_CHECK_URL = f'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{BRANCH}/{VERSION_JSON_FILE}'
 
@@ -33,7 +33,7 @@ def _get_latest_version(check_url):
     response = requests.get(check_url)
     response_json = response.json()
 
-    return response_json['PRO_VERSION_NUMBER']
+    return response_json['VERSION_NUMBER']
 
 
 class Toolbox():
@@ -150,7 +150,7 @@ class GeocodeTable():
 
         with open(Path(__file__).resolve().parent / VERSION_JSON_FILE) as version_file:
             version_json = json.load(version_file)
-            currentVersion = version_json['PRO_VERSION_NUMBER']
+            currentVersion = version_json['VERSION_NUMBER']
 
         messages.addMessage(f'Current version: {currentVersion}')
         try:
