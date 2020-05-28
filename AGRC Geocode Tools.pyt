@@ -24,7 +24,7 @@ LOCATORS = {
 }
 BRANCH = 'py-2'
 VERSION_JSON_FILE = 'tool-version.json'
-VERSION_CHECK_URL = f'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{BRANCH}/{VERSION_JSON_FILE}'
+VERSION_CHECK_URL = 'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}/{}'.format(BRANCH, VERSION_JSON_FILE)
 
 
 def _get_latest_version(check_url):
@@ -152,7 +152,7 @@ class GeocodeTable():
             version_json = json.load(version_file)
             currentVersion = version_json['VERSION_NUMBER']
 
-        messages.addMessage(f'Current version: {currentVersion}')
+        messages.addMessage('Current version: {}'.format(currentVersion))
         try:
             latestVersion = _get_latest_version(VERSION_CHECK_URL)
 
@@ -160,7 +160,7 @@ class GeocodeTable():
                 messages.addWarningMessage(
                     'There is a new version of this tool available!\n' +
                     'Please download at: https://github.com/agrc/geocoding-toolbox/\n' +
-                    f'Latest version: {latestVersion}. \nYour version: {currentVersion}'
+                    'Latest version: {}. \nYour version: {}'.format(latestVersion, currentVersion)
                 )
         except Exception:
             messages.addWarningMessage('GitHub request for latest version failed')

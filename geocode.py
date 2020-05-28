@@ -129,18 +129,18 @@ def execute(
     add_message       = the function that log messages are sent to
     ignore_failure    = used to ignore the short-circut on multiple subsequent failures at the beginning of the job
     """
-    url_template = Template(f'https://{HOST}/api/v1/geocode/$street/$zone')
+    url_template = Template('https://{}/api/v1/geocode/$street/$zone'.format(HOST))
     sequential_fails = 0
     success = 0
     fail = 0
     score = 0
     total = 0
 
-    add_message(f'api_key: {api_key}')
-    add_message(f'output_directory: {output_directory}')
-    add_message(f'spatial_reference: {spatial_reference}')
-    add_message(f'locators: {locators}')
-    add_message(f'ignore_failures: {ignore_failures}')
+    add_message('api_key: {}'.format(api_key))
+    add_message('output_directory: {}'.format(output_directory))
+    add_message('spatial_reference: {}'.format(spatial_reference))
+    add_message('locators: {}'.format(locators))
+    add_message('ignore_failures: {}'.format(ignore_failures))
 
     def log_status():
         try:
@@ -152,10 +152,10 @@ def execute(
         except ZeroDivisionError:
             average_score = 'n/a'
 
-        add_message(f'Total requests: {total}')
-        add_message(f'Failure rate: {failure_rate}%')
-        add_message(f'Average score: {average_score}')
-        add_message(f'Time taken: {_format_time(time.perf_counter() - start)}')
+        add_message('Total requests: {}'.format(total))
+        add_message('Failure rate: {}%'.format(failure_rate))
+        add_message('Average score: {}'.format(average_score))
+        add_message('Time taken: {}'.format(_format_time(time.perf_counter() - start)))
 
     #: convert strings to path objects
     output_directory = Path(output_directory)
@@ -178,7 +178,7 @@ def execute(
             fail += 1
             total += 1
 
-            add_message(f'Failure on row: {primary_key} with {street}, {zone}\n{error_message}')
+            add_message('Failure on row: {} with {}, {}\n{}'.format(primary_key, street, zone, error_message))
 
         for primary_key, street, zone in rows:
             if not ignore_failures and total == HEALTH_PROB_COUNT and sequential_fails == HEALTH_PROB_COUNT:
@@ -204,7 +204,9 @@ def execute(
                 try:
                     response = request.json()
                 except JSONDecodeError:
-                    write_error(primary_key, street, zone, f'Missing required parameters for URL: {request.url}')
+                    write_error(
+                        primary_key, street, zone, 'Missing required parameters for URL: {}'.format(request.url)
+                    )
 
                     continue
 
@@ -259,8 +261,9 @@ class InvalidAPIKeyException(Exception):
     def __init__(self, total, primary_key, message):
         self.total = total
         self.primary_key = primary_key
-        self.message = f'\n\nError returned for primary_key: {primary_key}\n' \
-            f'API response message:{message}\nTotal rows processed: {total}'
+        self.message = '\n\nError returned for primary_key: {}\n'.format(
+            primary_key
+        ) + 'API response message:{}\nTotal rows processed: {}'.format(message, total)
         super().__init__(self.message)
 
 
