@@ -6,19 +6,22 @@ Tools for geocoding addresses using AGRC's geocoding web service.
 CLI usage: `python geocode.py --help`.
 """
 
-import os
 from __future__ import print_function
 
 import csv
 import json
+import os
 import random
 import re
 import time
 from string import Template
 
 import requests
-from requests.adapters import HTTPAdapter
 
+BRANCH = 'py-2'
+VERSION_JSON_FILE = 'tool-version.json'
+VERSION_CHECK_URL = 'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}/{}'.format(BRANCH, VERSION_JSON_FILE)
+VERSION_KEY = 'VERSION_NUMBER'
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
 SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
@@ -113,6 +116,7 @@ def execute(
     success = 0
     stats = {'fail': 0, 'total': 0}
     score = 0
+    local_version = get_local_version()
 
     add_message('api_key: {}'.format(api_key))
     add_message('output_directory: {}'.format(output_directory))
@@ -171,7 +175,10 @@ def execute(
                         'spatialReference': spatial_reference,
                         'locators': locators
                     },
-                    headers={'x-client': 'geocoding-toolbox-py-2'}
+                    headers={
+                        'x-agrc-geocode-client': 'py-2-geocoding-toolbox',
+                        'x-agrc-geocode-client-version': local_version
+                    }
                 )
 
                 try:
@@ -241,6 +248,34 @@ class InvalidAPIKeyException(Exception):
             primary_key
         ) + 'API response message: {}\nTotal rows processed: {}'.format(message, total)
         super(InvalidAPIKeyException, self).__init__(self.message)
+
+
+def get_local_version():
+    """Get the version number of the local tool from disk
+    """
+    parent_folder = os.path.abspath(os.path.dirname(__file__))
+
+    if os.path.dirname(parent_folder) == 'src':
+        parent_folder = os.path.dirname(parent_folder)
+
+    tool_version = os.path.join(parent_folder, VERSION_JSON_FILE)
+
+    if not os.path.exists(tool_version):
+        return None
+
+    with open(tool_version) as version_file:
+        version_json = json.load(version_file)
+
+        return version_json[VERSION_KEY]
+
+
+def get_remote_version():
+    """Get the version number of the most recent code from the web
+    """
+    response = requests.get(VERSION_CHECK_URL)
+    response_json = response.json()
+
+    return response_json[VERSION_KEY]
 
 
 if __name__ == '__main__':
