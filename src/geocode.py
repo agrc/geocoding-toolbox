@@ -7,6 +7,8 @@ CLI usage: `python geocode.py --help`.
 """
 
 import os
+from __future__ import print_function
+
 import csv
 import random
 import re
@@ -93,7 +95,7 @@ def execute(
     output_directory,
     spatial_reference=DEFAULT_SPATIAL_REFERENCE,
     locators=DEFAULT_LOCATOR_NAME,
-    add_message=print,
+    add_message=print_function,
     ignore_failures=False
 ):
     """Geocode an iterator of data.
