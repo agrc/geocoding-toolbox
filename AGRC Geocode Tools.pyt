@@ -156,7 +156,7 @@ class GeocodeTable():
         try:
             latestVersion = _get_latest_version(VERSION_CHECK_URL)
 
-            if latestVersion and currentVersion != latestVersion:
+            if currentVersion != latestVersion:
                 messages.addWarningMessage(
                     'There is a new version of this tool available!\n' +
                     'Please download at: https://github.com/agrc/geocoding-toolbox/\n' +
