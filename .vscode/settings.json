@@ -1,5 +1,13 @@
 {
-  "cSpell.words": ["isort", "pylint", "strftime", "yapf"],
+  "cSpell.words": [
+    "AGRC",
+    "arcpy",
+    "isort",
+    "pylint",
+    "strftime",
+    "wkid",
+    "yapf"
+  ],
   "python.formatting.provider": "yapf",
   "python.formatting.yapfArgs": ["--style", "${workspaceRoot}/setup.cfg"],
   "python.formatting.yapfPath": "yapf",
