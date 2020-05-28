@@ -241,8 +241,8 @@ class InvalidAPIKeyException(Exception):
         self.primary_key = primary_key
         self.message = '\n\nError returned for primary_key: {}\n'.format(
             primary_key
-        ) + 'API response message:{}\nTotal rows processed: {}'.format(message, total)
-        super().__init__(self.message)
+        ) + 'API response message: {}\nTotal rows processed: {}'.format(message, total)
+        super(InvalidAPIKeyException, self).__init__(self.message)
 
 
 if __name__ == '__main__':
