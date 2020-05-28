@@ -1,22 +1,21 @@
-# ArcGIS Pro AGRC Web API Geocoding Toolbox
+# AGRC Geocoding Toolbox
 
-This custom toolbox created by the AGRC allows ArcGIS users to geocode a table of addresses. The geocoding tool makes use of the [AGRC Web API](https://api.mapserv.utah.gov) to perform the geocoding. A complimentary [API key](https://developer.mapserv.utah.gov) will need to be obtained to run the tool.
+This custom toolbox created by the AGRC allows ArcGIS users to geocode a table of addresses. The geocoding tool makes use of the [AGRC Web API](https://api.mapserv.utah.gov/#geocoding) to perform the geocoding. A complimentary [API key](https://developer.mapserv.utah.gov/secure/Home) will need to be obtained to run the tool.
 
-After the tool has completed, you will find a `.csv` and `.fgdb` with the input unique identifier field, the input address information, and the match results as fields.
+After the tool has completed, you will find a `.csv` with the input unique identifier field, the input address information, and the match results as fields.
 
 The table can be joined on the unique record identifier to reconnect the results with the original data. The [make xy event layer](https://pro.arcgis.com/en/pro-app/tool-reference/data-management/make-xy-event-layer.htm) tool can be used to create points from the x, y values to spatially view the locations in a map.
 
-ArcMap versions of this tool can be found in the [desktop-python-2](https://github.com/agrc/geocoding-toolbox/tree/desktop-python-2) branch.
+## ArcGIS Support
 
-## How to use
+This tool uses the python requests package that was bundled into ArcGIS Pro at version 1.3. Therefore, this tool is supported by ArcGIS Pro 1.3 or greater.
 
-1. Download the current version of the toolbox for [ArcGIS Pro](https://github.com/agrc/geocoding-toolbox/raw/master/AGRC%20Geocode%20Tools.tbx) or [ArcGIS Desktop](https://github.com/agrc/geocoding-toolbox/raw/desktop-python-2/AGRC%20Geocode%20Tools.tbx).
-1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new API key using your external ip address.
-1. Open `AGRC Geocode Tools.tbx` and run the tool.
+You can install requests into your ArcGIS Pro conda environment if you cannot upgrade to version 1.3 or greater.
 
-## Build
+## Installation
 
-There are two versions of the toolbox. `TableGeocoder/AGRC Geocode Tools.tbx` references a python script using relative paths and is for development. `AGRC Geocode Tools.tbx` (in the root of the project) is a copy of the development version with the script embedded. To cut a new release:
+1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new "Server" API key using your external ip address.
+1. Unzip the contents of `AGRC Geocode Tools.zip` to a directory on your computer and open the associated python toolbox in ArcGIS Pro/Desktop.
 
 ## Releasing
 
