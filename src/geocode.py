@@ -111,9 +111,8 @@ def execute(
     url_template = Template('https://{}/api/v1/geocode/$street/$zone'.format(HOST))
     sequential_fails = 0
     success = 0
-    fail = 0
+    stats = {'fail': 0, 'total': 0}
     score = 0
-    total = 0
 
     add_message('api_key: {}'.format(api_key))
     add_message('output_directory: {}'.format(output_directory))
@@ -123,7 +122,7 @@ def execute(
 
     def log_status():
         try:
-            failure_rate = round(100 * fail / total)
+            failure_rate = round(100 * stats['fail'] / stats['total'])
         except ZeroDivisionError:
             failure_rate = 100
         try:
@@ -131,7 +130,7 @@ def execute(
         except ZeroDivisionError:
             average_score = 'n/a'
 
-        add_message('Total requests: {}'.format(total))
+        add_message('Total requests: {}'.format(stats['total']))
         add_message('Failure rate: {}%'.format(failure_rate))
         add_message('Average score: {}'.format(average_score))
         add_message('Time taken: {}'.format(_format_time(time.perf_counter() - start)))
@@ -146,11 +145,10 @@ def execute(
         start = time.perf_counter()
 
         def write_error(primary_key, street, zone, error_message):
-            nonlocal fail, total
             writer.writerow((primary_key, street, zone, 0, 0, 0, None, None, None, None, error_message))
 
-            fail += 1
-            total += 1
+            stats['fail'] += 1
+            stats['total'] += 1
 
             add_message('Failure on row: {} with {}, {}\n{}'.format(primary_key, street, zone, error_message))
 
@@ -190,7 +188,7 @@ def execute(
 
                 if request.status_code == 400:
                     #: fail fast with api key auth
-                    raise InvalidAPIKeyException(total, primary_key, response['message'])
+                    raise InvalidAPIKeyException(stats['total'], primary_key, response['message'])
                 elif request.status_code != 200:
                     sequential_fails += 1
 
@@ -210,7 +208,7 @@ def execute(
 
                 sequential_fails = 0
                 success += 1
-                total += 1
+                stats['total'] += 1
                 score += match_score
 
                 writer.writerow((
@@ -222,7 +220,7 @@ def execute(
             except Exception as ex:
                 write_error(primary_key, street, zone, str(ex)[:500])
 
-            if total % 10000 == 0:
+            if stats['total'] % 10000 == 0:
                 log_status()
                 start = time.perf_counter()
 
