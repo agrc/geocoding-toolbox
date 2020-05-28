@@ -18,25 +18,13 @@ ArcMap versions of this tool can be found in the [desktop-python-2](https://gith
 
 There are two versions of the toolbox. `TableGeocoder/AGRC Geocode Tools.tbx` references a python script using relative paths and is for development. `AGRC Geocode Tools.tbx` (in the root of the project) is a copy of the development version with the script embedded. To cut a new release:
 
-1. Bump the version numbers in `tool-version.json` and `TableGeocoder/GeocodeAddressTable.py`.
-1. Delete `AGRC Geocode Tools.tbx` (in the root).
-1. Copy `TableGeocoder/AGRC Geocode Tools.tbx` to the root folder.
-1. You may need to fix the path to the script file in the newly copied toolbox tool.
-1. Go to the properties of the `Geocode Table` script tool in the newly copied toolbox and select the "Import Script" checkbox.
+## Releasing
 
-## CLI
+There is a `cut_release.py` CLI to bump and package releases.
 
-This script can be used outside of pro as a python CLI. The following is a sample.
-
-```sh
-python geocode.py --help
-```
-
-```sh
-python geocode.py AGRC-apikey "c:\path\to.csv" "id" "address" "zone" "all" 26912 "c:\path\to\output\folder"
-```
-
-## More information
-
-- https://gis.utah.gov/data/address-geocoders-locators/#GeocodingToolbox
-- https://gis.utah.gov/developer/widgets/#arcgis-extensions
+1. Install the CLI dependencies
+   `pip install -r requirements.dev.txt`
+1. Cut a release with the CLI
+   `python cut_release.py minor`
+   - To see the full options of the CLI use `python cut_release.py --help
+1. Push the release commit to GitHub
