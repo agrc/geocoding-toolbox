@@ -255,7 +255,7 @@ def get_local_version():
     """
     parent_folder = os.path.abspath(os.path.dirname(__file__))
 
-    if os.path.dirname(parent_folder) == 'src':
+    if os.path.basename(parent_folder) == 'src':
         parent_folder = os.path.dirname(parent_folder)
 
     tool_version = os.path.join(parent_folder, VERSION_JSON_FILE)
