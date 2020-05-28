@@ -1,0 +1,12 @@
+{
+  "cSpell.words": ["isort", "pylint", "strftime", "yapf"],
+  "python.formatting.provider": "yapf",
+  "python.formatting.yapfArgs": ["--style", "${workspaceRoot}/setup.cfg"],
+  "python.formatting.yapfPath": "yapf",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": false,
+  "python.linting.pycodestyleEnabled": false,
+  "python.linting.pylintEnabled": true,
+  "python.pythonPath": ".env/bin/python",
+  "editor.formatOnSave": true
+}
