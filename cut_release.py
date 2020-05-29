@@ -43,7 +43,7 @@ def cut_release(args):
     current_version = get_version(python_version)
     print(f'prior version: {current_version}')
 
-    repo = Repo(Path(__file__).resolve().parents[1])
+    repo = Repo(Path(__file__).resolve().parent)
     g = repo.git
 
     if python_version == '2':
@@ -138,7 +138,7 @@ def set_version(python_version, new_version):
 def publish():
     """push new commits/tags to GitHub
     """
-    repo = Repo(Path(__file__).resolve().parents[1])
+    repo = Repo(Path(__file__).resolve().parent)
     g = repo.git
 
     for branch in BRANCHES.values():
