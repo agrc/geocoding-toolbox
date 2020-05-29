@@ -98,7 +98,7 @@ class GeocodeTable():
             parameterType='Required',
             direction='Input',
         )
-        spatial_reference_parameter.value = arcpy.SpatialReference(geocode.DEFAULT_SPATIAL_REFERENCE)
+        spatial_reference_parameter.value = geocode.DEFAULT_SPATIAL_REFERENCE
 
         locator_parameter = arcpy.Parameter(
             name='locator',
