@@ -5,11 +5,6 @@ A python toolbox
 """
 # pylint: disable=invalid-name
 
-import json
-from pathlib import Path
-
-import requests
-
 import arcpy
 import geocode
 
@@ -22,19 +17,6 @@ LOCATORS = {
     'Road centerlines': 'roadCenterlines',
     'Address points': 'addressPoints'
 }
-BRANCH = 'master'
-VERSION_JSON_FILE = 'tool-version.json'
-VERSION_CHECK_URL = f'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{BRANCH}/{VERSION_JSON_FILE}'
-
-
-def _get_latest_version(check_url):
-    """Get current version number
-    """
-    response = requests.get(check_url)
-    response_json = response.json()
-
-    return response_json['PRO_VERSION_NUMBER']
-
 
 class Toolbox():
     """Esri Python Toolbox
@@ -148,15 +130,13 @@ class GeocodeTable():
             output_directory_parameter, spatial_reference_parameter, locator_parameter, \
                 output_csv_parameter = parameters
 
-        with open(Path(__file__).resolve().parent / VERSION_JSON_FILE) as version_file:
-            version_json = json.load(version_file)
-            currentVersion = version_json['PRO_VERSION_NUMBER']
 
-        messages.addMessage(f'Current version: {currentVersion}')
+        local_version = geocode.get_local_version()
+        messages.addMessage(f'Current version: {local_version}')
         try:
-            latestVersion = _get_latest_version(VERSION_CHECK_URL)
+           remote_version = geocode.get_remote_version()
 
-            if currentVersion != latestVersion:
+            if local_version != remote_version:
                 messages.addWarningMessage(
                     'There is a new version of this tool available!\n' +
                     'Please download at: https://github.com/agrc/geocoding-toolbox/\n' +
