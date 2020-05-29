@@ -17,6 +17,8 @@ import time
 from string import Template
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 BRANCH = 'py-2'
 VERSION_JSON_FILE = 'tool-version.json'
@@ -33,6 +35,33 @@ HEADER = (
 )
 UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 HEALTH_PROBE_COUNT = 25
+
+
+def _get_retry_session():
+    """create a requests session that has a retry built into it
+    """
+    retries = 3
+    backoff_factor = 0.3
+    status_forcelist = (500, 502, 504)
+
+    local_version = get_local_version()
+
+    session = requests.Session()
+    session.headers.update({
+        'x-agrc-geocode-client': 'py-3-geocoding-toolbox',
+        'x-agrc-geocode-client-version': local_version
+    })
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('https://', adapter)
+
+    return session
 
 
 def _cleanse_street(data):
@@ -148,6 +177,8 @@ def execute(
 
         start = time.clock()
 
+        session = _get_retry_session()
+
         def write_error(primary_key, street, zone, error_message):
             writer.writerow((primary_key, street, zone, 0, 0, 0, None, None, None, None, error_message))
 
@@ -165,7 +196,7 @@ def execute(
             time.sleep(random.uniform(RATE_LIMIT_SECONDS[0], RATE_LIMIT_SECONDS[1]))
 
             try:
-                request = requests.get(
+                request = session.get(
                     url,
                     timeout=5,
                     params={
