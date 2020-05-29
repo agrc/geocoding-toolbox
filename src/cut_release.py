@@ -24,7 +24,7 @@ VERSION_NAMES = {'3': 'PRO_VERSION_NUMBER', '2': 'VERSION_NUMBER'}
 CONVENTIONAL_COMMITS = {'3': 'py-3', '2': 'py-2'}
 BUILD_ASSETS = [Path('src') / x for x in ('AGRC Geocode Tools.pyt', 'geocode.py')] + [Path('tool-version.json')]
 print(BUILD_ASSETS)
-TOOL_ZIP = Path('build') / 'AGRC Geocode Tools.zip'
+TOOL_ZIP = Path('tool') / 'AGRC Geocode Tools.zip'
 
 
 def cut_release(args):
