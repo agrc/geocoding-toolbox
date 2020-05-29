@@ -37,3 +37,4 @@ nosetests.xml
 TableGeocoder/TestRunner.py
 TableGeocoder/Data/TestOutput
 .env/
+.DS_Store
