@@ -61,7 +61,7 @@ def cut_release(args):
         g.checkout(BRANCHES['3'])
         set_version(python_version, new_version)
 
-        release_commit(g, new_version, python_version)
+        release_commit(g, new_version, python_version, tag=False)
     else:
         new_version = bump(current_version, release_type)
         set_version(python_version, new_version)
@@ -73,7 +73,7 @@ def cut_release(args):
     print(f'new version: {new_version}')
 
 
-def release_commit(g, new_version, python_version, include_zip=False):
+def release_commit(g, new_version, python_version, include_zip=False, tag=True):
     """make release commit
     """
     g.add('tool-version.json')
@@ -84,7 +84,9 @@ def release_commit(g, new_version, python_version, include_zip=False):
     scope = CONVENTIONAL_COMMITS[python_version]
 
     g.commit(m=f'release({scope}): v{new_version}')
-    g.tag(f'v{new_version}-{scope}')
+
+    if tag:
+        g.tag(f'v{new_version}-{scope}')
 
 
 def build_zip():
