@@ -15,6 +15,6 @@
   "python.linting.flake8Enabled": false,
   "python.linting.pycodestyleEnabled": false,
   "python.linting.pylintEnabled": true,
-  "python.pythonPath": ".env/bin/python",
+  "python.pythonPath": "C:\\Python27\\ArcGIS10.7\\python.exe",
   "editor.formatOnSave": true
 }
