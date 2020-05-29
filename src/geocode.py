@@ -158,9 +158,7 @@ def execute(
 
         for primary_key, street, zone in rows:
             if not ignore_failures and stats['total'] == HEALTH_PROBE_COUNT and sequential_fails == HEALTH_PROBE_COUNT:
-                add_message('Continuous fail threshold reached. Failing entire job.')
-
-                return None
+                raise ContinuousFailThresholdExceeded()
 
             url = url_template.substitute({'street': _cleanse_street(street), 'zone': _cleanse_zone(zone)})
 
@@ -248,6 +246,15 @@ class InvalidAPIKeyException(Exception):
             primary_key
         ) + 'API response message: {}\nTotal rows processed: {}'.format(message, total)
         super(InvalidAPIKeyException, self).__init__(self.message)
+
+
+class ContinuousFailThresholdExceeded(Exception):
+    """Their have been more failures to begin the job than the configured threshold
+    """
+
+    def __init__(self):
+        self.message = 'Continuous fail threshold reached. Failing entire job.'
+        super(ContinuousFailThresholdExceeded, self).__init__(self.message)
 
 
 def get_local_version():
