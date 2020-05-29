@@ -27,3 +27,4 @@ There is a `cut_release.py` CLI to bump and package releases.
    `python cut_release.py minor`
    - To see the full options of the CLI use `python cut_release.py --help
 1. Push the release commit to GitHub
+   - `python cut_release.py publish`
