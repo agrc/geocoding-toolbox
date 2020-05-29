@@ -22,8 +22,9 @@ BUMP_TYPES = ['major', 'minor', 'patch']
 BRANCHES = {'3': 'master', '2': 'desktop-python-2'}
 VERSION_NAMES = {'3': 'PRO_VERSION_NUMBER', '2': 'VERSION_NUMBER'}
 CONVENTIONAL_COMMITS = {'3': 'py-3', '2': 'py-2'}
-BUILD_ASSETS = ['AGRC Geocode Tools.pyt', 'geocode.py', 'tool-version.json']
-TOOL_ZIP = 'AGRC Geocode Tools.zip'
+BUILD_ASSETS = [Path('src') / x for x in ('AGRC Geocode Tools.pyt', 'geocode.py')] + [Path('tool-version.json')]
+print(BUILD_ASSETS)
+TOOL_ZIP = Path('tool') / 'AGRC Geocode Tools.zip'
 
 
 def cut_release(args):
@@ -43,7 +44,7 @@ def cut_release(args):
     current_version = get_version(python_version)
     print(f'prior version: {current_version}')
 
-    repo = Repo(Path(__file__).resolve().parent)
+    repo = Repo(Path(__file__).resolve().parents[1])
     g = repo.git
 
     if python_version == '2':
@@ -92,7 +93,7 @@ def build_zip():
     """
     with ZipFile(TOOL_ZIP, 'w') as zip_file:
         for filename in BUILD_ASSETS:
-            zip_file.write(filename)
+            zip_file.write(filename, filename.name)
 
 
 def bump(current_version, release_type):
