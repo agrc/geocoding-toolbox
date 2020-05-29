@@ -19,11 +19,10 @@ from docopt import docopt
 from git import Repo
 
 BUMP_TYPES = ['major', 'minor', 'patch']
-BRANCHES = {'3': 'master', '2': 'desktop-python-2'}
+BRANCHES = {'3': 'master', '2': 'py-2'}
 VERSION_NAMES = {'3': 'PRO_VERSION_NUMBER', '2': 'VERSION_NUMBER'}
 CONVENTIONAL_COMMITS = {'3': 'py-3', '2': 'py-2'}
 BUILD_ASSETS = [Path('src') / x for x in ('AGRC Geocode Tools.pyt', 'geocode.py')] + [Path('tool-version.json')]
-print(BUILD_ASSETS)
 TOOL_ZIP = Path('tool') / 'AGRC Geocode Tools.zip'
 
 
@@ -137,11 +136,11 @@ def set_version(python_version, new_version):
 def publish():
     """push new commits/tags to GitHub
     """
-    repo = Repo(Path(__file__).resolve().parent)
+    repo = Repo(Path(__file__).resolve().parents[1])
     g = repo.git
 
-    for branch in BRANCHES:
-        g.push('origin', branch, tags=True)
+    for branch in BRANCHES.values():
+        result = g.push('origin', branch, tags=True)
 
 
 if __name__ == '__main__':
