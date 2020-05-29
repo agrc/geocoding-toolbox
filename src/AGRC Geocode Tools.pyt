@@ -38,6 +38,10 @@ class GeocodeTable():
         self.label = 'Geocode Table'
         self.description = 'Geocode street addresses using AGRC\'s geocoding web service.'
 
+        #: force this tool to run in the 32-bit python instance
+        #: ref https://support.esri.com/en/technical-article/000011742
+        self.canRunInBackground = False
+
     def getParameterInfo(self):
         """Define parameter definitions
         """
