@@ -18,6 +18,7 @@ LOCATORS = {
     'Address points': 'addressPoints'
 }
 
+
 class Toolbox():
     """Esri Python Toolbox
     """
@@ -130,17 +131,16 @@ class GeocodeTable():
             output_directory_parameter, spatial_reference_parameter, locator_parameter, \
                 output_csv_parameter = parameters
 
-
         local_version = geocode.get_local_version()
         messages.addMessage(f'Current version: {local_version}')
         try:
-           remote_version = geocode.get_remote_version()
+            remote_version = geocode.get_remote_version()
 
             if local_version != remote_version:
                 messages.addWarningMessage(
                     'There is a new version of this tool available!\n' +
                     'Please download at: https://github.com/agrc/geocoding-toolbox/\n' +
-                    f'Latest version: {latestVersion}. \nYour version: {currentVersion}'
+                    f'Latest version: {remote_version}. \nYour version: {local_version}'
                 )
         except Exception:
             messages.addWarningMessage('GitHub request for latest version failed')
