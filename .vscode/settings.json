@@ -1,5 +1,14 @@
 {
-  "cSpell.words": ["isort", "pylint", "strftime", "yapf"],
+  "cSpell.words": [
+    "docopt",
+    "gitpython",
+    "instafail",
+    "isort",
+    "pylint",
+    "pytest",
+    "strftime",
+    "yapf"
+  ],
   "python.formatting.provider": "yapf",
   "python.formatting.yapfArgs": ["--style", "${workspaceRoot}/setup.cfg"],
   "python.formatting.yapfPath": "yapf",
@@ -9,4 +18,5 @@
   "python.linting.pylintEnabled": true,
   "python.pythonPath": "C:\\Users\\agrc-arcgis\\AppData\\Local\\ESRI\\conda\\envs\\geocodingtoolbox\\python.exe",
   "editor.formatOnSave": true
+  "coverage-gutters.coverageFileNames": ["cov.xml"]
 }
