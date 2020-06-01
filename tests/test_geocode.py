@@ -7,7 +7,6 @@ A module that contains tests for the geocoding module.
 '''
 
 import pytest
-from pathlib import Path
 from agrcgeocoding import geocode
 import csv
 
@@ -25,26 +24,27 @@ def test_clean_zone(zone):
     assert 'salt lake city' == geocode._cleanse_zone('salt & lake city')
 
 def test_get_local_finds_version_from_src(tmpdir):
+    src = os.path.join(tmpdir, 'src')
+    os.makedirs(src)
 
-    src = Path(tmpdir) / 'src'
-    src.mkdir()
-    version = Path(tmpdir) / 'tool-version.json'
-    version.touch()
+    version = os.path.join(tmpdir, 'tool-version.json')
 
-    with version.open(mode='w') as version_file:
+    with version.open(mode='w+') as version_file:
         version_file.write('{"PRO_VERSION_NUMBER": "1.0.0"}')
 
-    assert "1.0.0" == geocode.get_local_version(src / 'geocode.py')
+    current_file = os.path.join(src, 'geocode.py')
+
+    assert "1.0.0" == geocode.get_local_version(current_file)
 
 def test_get_local_finds_version_from_sibling(tmpdir):
-    parent = Path(tmpdir)
-    version = parent / 'tool-version.json'
-    version.touch()
+    parent = os.path.join(tmpdir, 'tool-version.json')
 
-    with version.open(mode='w') as version_file:
+    with version.open(mode='w+') as version_file:
         version_file.write('{"PRO_VERSION_NUMBER": "1.0.0"}')
 
-    assert "1.0.0" == geocode.get_local_version(parent / 'geocode.py')
+    current_file = os.path.join(parent, 'geocode.py')
+
+    assert "1.0.0" == geocode.get_local_version(current_file)
 
 def test_get_remote_version(requests_mock):
     response = {"PRO_VERSION_NUMBER": "1.0.0"}
