@@ -22,7 +22,8 @@ BUMP_TYPES = ['major', 'minor', 'patch']
 BRANCHES = {'3': 'master', '2': 'py-2'}
 VERSION_NAMES = {'3': 'PRO_VERSION_NUMBER', '2': 'VERSION_NUMBER'}
 CONVENTIONAL_COMMITS = {'3': 'py-3', '2': 'py-2'}
-BUILD_ASSETS = [Path('src') / x for x in ('AGRC Geocode Tools.pyt', 'geocode.py')] + [Path('tool-version.json')]
+BUILD_ASSETS = [Path('src') / 'agrcgeocoding' / 'geocode.py',
+                Path('src') / 'AGRC Geocode Tools.pyt'] + [Path('tool-version.json')]
 TOOL_ZIP = Path('tool') / 'AGRC Geocode Tools.zip'
 
 
@@ -31,6 +32,9 @@ def cut_release(args):
     """
     python_version = args['--python-version']
     print(f'release branch: {BRANCHES[python_version]}')
+
+    repo = Repo(Path(__file__).resolve().parent)
+    git_cli = repo.git
 
     release_type = BUMP_TYPES[2]
     if args['major']:
@@ -42,9 +46,6 @@ def cut_release(args):
 
     current_version = get_version(python_version)
     print(f'prior version: {current_version}')
-
-    repo = Repo(Path(__file__).resolve().parent)
-    git_cli = repo.git
 
     if python_version == '2':
         desktop_branch = BRANCHES['2']
