@@ -28,3 +28,14 @@ There is a `cut_release.py` CLI to bump and package releases.
    - To see the full options of the CLI use `python cut_release.py --help
 1. Push the release commit to GitHub
    - `python cut_release.py publish`
+
+## Testing
+
+1. install a local editable module
+   - `pip install -e ".[tests]"`
+   - `pip install -e .` to install without the testing dependencies
+1. run the tests
+   - `pytest`
+   - `pwt` to run the tests continually in watch mode
+1. to generate code coverage that works with [vscode gutters](https://github.com/ryanluker/vscode-coverage-gutters)
+   - `ptw -- --cov=agrcgeocoding --cov-report xml:cov.xml`
