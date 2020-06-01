@@ -23,6 +23,6 @@
   "python.linting.pycodestyleEnabled": false,
   "python.linting.pylintEnabled": true,
   "python.pythonPath": "C:\\Users\\agrc-arcgis\\AppData\\Local\\ESRI\\conda\\envs\\geocodingtoolbox\\python.exe",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
   "coverage-gutters.coverageFileNames": ["cov.xml"]
 }
