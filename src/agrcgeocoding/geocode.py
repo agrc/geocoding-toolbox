@@ -25,7 +25,8 @@ VERSION_CHECK_URL = 'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}
 VERSION_KEY = 'PRO_VERSION_NUMBER'
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
-SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
+SPACES = re.compile(' +')
+ALLOWABLE_CHARS = re.compile('[^a-zA-Z0-9]')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
 HOST = 'api.mapserv.utah.gov'
 HEADER = (
@@ -40,25 +41,11 @@ def _cleanse_street(data):
     """cleans up address garbage
     """
     replacement = ' '
-    street = str(data).strip()
 
+    #: & -> and
+    street = data.replace(chr(38), 'and')
+    street = ALLOWABLE_CHARS.sub(replacement, street)
     street = SPACES.sub(replacement, street)
-
-    for char in range(0, 31):
-        street = street.replace(chr(char), replacement)
-    for char in range(33, 37):
-        street = street.replace(chr(char), replacement)
-
-    street = street.replace(chr(38), 'and')
-
-    for char in range(39, 47):
-        street = street.replace(chr(char), replacement)
-    for char in range(58, 64):
-        street = street.replace(chr(char), replacement)
-    for char in range(91, 96):
-        street = street.replace(chr(char), replacement)
-    for char in range(123, 255):
-        street = street.replace(chr(char), replacement)
 
     return street.strip()
 
@@ -66,7 +53,8 @@ def _cleanse_street(data):
 def _cleanse_zone(data):
     """cleans up zone garbage
     """
-    zone = SPACES.sub(' ', str(data)).strip()
+    zone = ALLOWABLE_CHARS.sub(' ', str(data))
+    zone = SPACES.sub(' ', zone).strip()
 
     if len(zone) > 0 and zone[0] == '8':
         zone = zone.strip()[:5]
@@ -232,6 +220,7 @@ def execute(
                 match_address = match['matchAddress']
                 standardized_address = match['standardizedAddress']
                 address_grid = match['addressGrid']
+                locator = match['locator']
 
                 match_x = location['x']
                 match_y = location['y']
@@ -242,8 +231,8 @@ def execute(
                 score += match_score
 
                 writer.writerow((
-                    primary_key, street, zone, match_score, match_address, standardized_address, address_grid, match_x,
-                    match_y, None
+                    primary_key, street, zone, match_x, match_y, match_score, locator, match_address,
+                    standardized_address, address_grid, None
                 ))
             except InvalidAPIKeyException as ex:
                 raise ex
@@ -260,10 +249,10 @@ def execute(
     return output_table
 
 
-def get_local_version():
+def get_local_version(temp_dir=Path(__file__).resolve()):
     """Get the version number of the local tool from disk
     """
-    parent_folder = Path(__file__).resolve().parent
+    parent_folder = temp_dir.parent
 
     if parent_folder.name == 'src':
         parent_folder = parent_folder.parent
