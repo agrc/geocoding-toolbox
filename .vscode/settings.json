@@ -1,12 +1,18 @@
 {
   "cSpell.words": [
+    "agrc",
+    "agrcgeocoding",
+    "arcpy",
+    "conda",
     "docopt",
+    "geocode",
     "gitpython",
     "instafail",
     "isort",
     "pylint",
     "pytest",
     "strftime",
+    "wkid",
     "yapf"
   ],
   "python.formatting.provider": "yapf",
