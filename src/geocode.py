@@ -48,7 +48,7 @@ def _get_retry_session():
 
     session = requests.Session()
     session.headers.update({
-        'x-agrc-geocode-client': 'py-3-geocoding-toolbox',
+        'x-agrc-geocode-client': 'py-2-geocoding-toolbox',
         'x-agrc-geocode-client-version': local_version
     })
     retry = Retry(
@@ -203,10 +203,6 @@ def execute(
                         'apiKey': api_key,
                         'spatialReference': spatial_reference,
                         'locators': locators
-                    },
-                    headers={
-                        'x-agrc-geocode-client': 'py-2-geocoding-toolbox',
-                        'x-agrc-geocode-client-version': local_version
                     }
                 )
 
