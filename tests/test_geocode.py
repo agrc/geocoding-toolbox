@@ -5,6 +5,7 @@
 testgeocode.py
 A module that contains tests for the geocoding module.
 '''
+#pylint: disable=missing-function-docstring
 
 import pytest
 from pathlib import Path
@@ -25,32 +26,45 @@ def test_clean_zone(zone):
     assert 'salt lake city' == geocode._cleanse_zone('salt & lake city')
 
 def test_get_local_finds_version_from_src(tmpdir):
-
-    src = Path(tmpdir) / 'src'
-    src.mkdir()
     version = Path(tmpdir) / 'tool-version.json'
     version.touch()
 
     with version.open(mode='w') as version_file:
         version_file.write('{"PRO_VERSION_NUMBER": "1.0.0"}')
 
-    assert "1.0.0" == geocode.get_local_version(src / 'geocode.py')
+    src = Path(tmpdir) / 'module-folder' / 'src' / 'geocode.py'
+    src.mkdir(parents=True)
 
-def test_get_local_finds_version_from_sibling(tmpdir):
-    parent = Path(tmpdir)
-    version = parent / 'tool-version.json'
+    assert '1.0.0' == geocode.get_local_version(src)
+
+def test_get_local_returns_null_3_levels_up(tmpdir):
+    version = Path(tmpdir) / 'tool-version.json'
     version.touch()
 
     with version.open(mode='w') as version_file:
         version_file.write('{"PRO_VERSION_NUMBER": "1.0.0"}')
 
-    assert "1.0.0" == geocode.get_local_version(parent / 'geocode.py')
+    src = Path(tmpdir) / 'module-folder' / 'another-folder' / 'more-folders' / 'too-many-folders' / 'geocode.py'
+    src.mkdir(parents=True)
+
+    assert geocode.get_local_version(src) == None
+
+def test_get_local_finds_version_from_sibling(tmpdir):
+    version = Path(tmpdir) / 'tool-version.json'
+    version.touch()
+
+    with version.open(mode='w') as version_file:
+        version_file.write('{"PRO_VERSION_NUMBER": "1.0.0"}')
+
+    parent = Path(tmpdir)
+
+    assert '1.0.0' == geocode.get_local_version(parent / 'geocode.py')
 
 def test_get_remote_version(requests_mock):
-    response = {"PRO_VERSION_NUMBER": "1.0.0"}
+    response = {'PRO_VERSION_NUMBER': '1.0.0'}
     requests_mock.get('https://raw.githubusercontent.com/agrc/geocoding-toolbox/master/tool-version.json', json=response)
 
-    assert "1.0.0" == geocode.get_remote_version()
+    assert '1.0.0' == geocode.get_remote_version()
 
 def test_invalid_API_key(tmpdir):
     with pytest.raises(geocode.InvalidAPIKeyException):
@@ -112,7 +126,7 @@ def test_successful_run(tmpdir, requests_mock):
 
 
 def test_bad_url(tmpdir, requests_mock):
-    bad_request_response = "not a json object because the api route was not matched since zone is empty"
+    bad_request_response = 'not a json object because the api route was not matched since zone is empty'
     street = 'a'
     zone = 'fake'
     url = f'/api/v1/geocode/{street}/{zone}'
