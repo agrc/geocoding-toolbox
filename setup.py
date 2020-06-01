@@ -46,6 +46,7 @@ setup(
         'tests': [
             'yapf==0.30.*',
             'pylint==2.5.*',
+            'pylint-quotes==0.2.*',
             'pytest==5.4.*',
             'pytest-cov==2.9.*',
             'pytest-instafail==0.4.*',
