@@ -252,12 +252,18 @@ def execute(
 def get_local_version(temp_dir=Path(__file__).resolve()):
     """Get the version number of the local tool from disk
     """
+    levels = 3
+    i = 0
+
     parent_folder = temp_dir.parent
 
-    if parent_folder.name == 'src':
-        parent_folder = parent_folder.parent
-
     tool_version = parent_folder / VERSION_JSON_FILE
+
+    while not tool_version.exists() and i < levels:
+        parent_folder = parent_folder.parent
+        tool_version = parent_folder / VERSION_JSON_FILE
+        print(tool_version)
+        i += 1
 
     if not tool_version.exists():
         return None
