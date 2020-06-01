@@ -6,11 +6,15 @@ A python toolbox
 # pylint: disable=invalid-name
 
 import arcpy
-import geocode
+try:
+    import geocode
+except ImportError:
+    #: must be in development
+    from agrcgeocoding import geocode
 
-#: to force refresh of the module in ArcGIS Pro - for development only
-# import importlib  # isort:skip
-# importlib.reload(geocode)
+    #: to force refresh of the module in ArcGIS Pro - for development only
+    import importlib  # isort:skip
+    importlib.reload(geocode)
 
 LOCATORS = {
     'Address points and road centerlines': 'all',
