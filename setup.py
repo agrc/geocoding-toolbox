@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+"""
+setup.py
+A module that installs agrcgeocoding as a module
+"""
 import io
 import json
-import re
 from glob import glob
 from os.path import basename
 from os.path import dirname
@@ -14,8 +17,10 @@ from setuptools import setup
 
 
 def read(*names, **kwargs):
-    with io.open(join(dirname(__file__), *names), encoding=kwargs.get('encoding', 'utf8')) as fh:
-        return fh.read()
+    """read the contents of a file
+    """
+    with io.open(join(dirname(__file__), *names), encoding=kwargs.get('encoding', 'utf8')) as file_handler:
+        return file_handler.read()
 
 
 setup(

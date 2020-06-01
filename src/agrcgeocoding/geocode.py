@@ -5,7 +5,6 @@ Tools for geocoding addresses using AGRC's geocoding web service.
 
 CLI usage: `python geocode.py --help`.
 """
-
 import csv
 import json
 import random
@@ -127,6 +126,9 @@ def execute(
     add_message       = the function that log messages are sent to
     ignore_failure    = used to ignore the short-circut on multiple subsequent failures at the beginning of the job
     """
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     url_template = Template(f'https://{HOST}/api/v1/geocode/$street/$zone')
     sequential_fails = 0
     success = 0
@@ -207,7 +209,8 @@ def execute(
                 if request.status_code == 400:
                     #: fail fast with api key auth
                     raise InvalidAPIKeyException(total, primary_key, response['message'])
-                elif request.status_code != 200:
+
+                if request.status_code != 200:
                     sequential_fails += 1
 
                     write_error(primary_key, street, zone, response['message'])

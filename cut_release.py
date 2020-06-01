@@ -44,49 +44,49 @@ def cut_release(args):
     print(f'prior version: {current_version}')
 
     repo = Repo(Path(__file__).resolve().parent)
-    g = repo.git
+    git_cli = repo.git
 
     if python_version == '2':
         desktop_branch = BRANCHES['2']
-        g.checkout(desktop_branch)
+        git_cli.checkout(desktop_branch)
 
         new_version = bump(current_version, release_type)
         set_version(python_version, new_version)
 
         build_zip()
 
-        release_commit(g, new_version, python_version, include_zip=True)
+        release_commit(git_cli, new_version, python_version, include_zip=True)
 
         #: switch back to master
-        g.checkout(BRANCHES['3'])
+        git_cli.checkout(BRANCHES['3'])
         set_version(python_version, new_version)
 
-        release_commit(g, new_version, python_version, tag=False)
+        release_commit(git_cli, new_version, python_version, tag=False)
     else:
         new_version = bump(current_version, release_type)
         set_version(python_version, new_version)
 
         build_zip()
 
-        release_commit(g, new_version, python_version, include_zip=True)
+        release_commit(git_cli, new_version, python_version, include_zip=True)
 
     print(f'new version: {new_version}')
 
 
-def release_commit(g, new_version, python_version, include_zip=False, tag=True):
+def release_commit(git_cli, new_version, python_version, include_zip=False, tag=True):
     """make release commit
     """
-    g.add('tool-version.json')
+    git_cli.add('tool-version.json')
 
     if include_zip:
-        g.add(TOOL_ZIP)
+        git_cli.add(TOOL_ZIP)
 
     scope = CONVENTIONAL_COMMITS[python_version]
 
-    g.commit(m=f'release({scope}): v{new_version}')
+    git_cli.commit(m=f'release({scope}): v{new_version}')
 
     if tag:
-        g.tag(f'v{new_version}-{scope}')
+        git_cli.tag(f'v{new_version}-{scope}')
 
 
 def build_zip():
@@ -139,10 +139,10 @@ def publish():
     """push new commits/tags to GitHub
     """
     repo = Repo(Path(__file__).resolve().parent)
-    g = repo.git
+    git_cli = repo.git
 
     for branch in BRANCHES.values():
-        result = g.push('origin', branch, tags=True)
+        git_cli.push('origin', branch, tags=True)
 
 
 if __name__ == '__main__':
