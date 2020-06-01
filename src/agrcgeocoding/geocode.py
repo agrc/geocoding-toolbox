@@ -284,15 +284,18 @@ class ContinuousFailThresholdExceeded(Exception):
         super(ContinuousFailThresholdExceeded, self).__init__(self.message)
 
 
-def get_local_version():
+def get_local_version(parent_folder=os.path.abspath(os.path.dirname(__file__))):
     """Get the version number of the local tool from disk
     """
-    parent_folder = os.path.abspath(os.path.dirname(__file__))
-
-    if os.path.basename(parent_folder) == 'src':
-        parent_folder = os.path.dirname(parent_folder)
+    levels = 3
+    i = 0
 
     tool_version = os.path.join(parent_folder, VERSION_JSON_FILE)
+
+    while not os.path.exists(tool_version) and i < 3:
+        parent_folder = os.path.dirname(parent_folder)
+        tool_version = os.path.join(parent_folder, VERSION_JSON_FILE)
+        i += 1
 
     if not os.path.exists(tool_version):
         return None
