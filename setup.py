@@ -42,7 +42,7 @@ setup(
         'Issue Tracker': 'https://github.com/agrc/geocoding-toolbox/issues',
     },
     keywords=['geocoding', 'gis'],
-    install_requires=['requests==2.23.*', 'docopt==0.6.*', 'gitpython==3.1.*'],
+    install_requires=['requests==2.23.*'],
     extras_require={
         'dev': [
             'docopt==0.6.*',
