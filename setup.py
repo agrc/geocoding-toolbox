@@ -7,13 +7,9 @@ A module that installs agrcgeocoding as a module
 import io
 import json
 from glob import glob
-from os.path import basename
-from os.path import dirname
-from os.path import join
-from os.path import splitext
+from os.path import basename, dirname, join, splitext
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 def read(*names, **kwargs):
@@ -48,17 +44,19 @@ setup(
     keywords=['geocoding', 'gis'],
     install_requires=['requests==2.23.*', 'docopt==0.6.*', 'gitpython==3.1.*'],
     extras_require={
-        'tests': [
-            'yapf==0.30.*',
-            'pylint==2.5.*',
+        'dev': [
+            'docopt==0.6.*',
+            'gitpython==3.1.*',
             'pylint-quotes==0.2.*',
-            'pytest==5.4.*',
+            'pylint==2.5.*',
             'pytest-cov==2.9.*',
             'pytest-instafail==0.4.*',
             'pytest-isort==1.0.*',
             'pytest-pylint==0.17.*',
             'pytest-watch==4.2.*',
+            'pytest==5.4.*',
             'requests-mock==1.8.*',
+            'yapf==0.30.*',
         ]
     },
     setup_requires=[

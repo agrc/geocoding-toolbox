@@ -24,12 +24,18 @@ arcpy.agrcgeocoding.GeocodeTable('AGRC-99999999999999', r'C:\temp\tests\normal.c
 1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new "Server" API key using your external ip address.
 1. Unzip the contents of `AGRC Geocode Tools.zip` to a directory on your computer and open the associated python toolbox in ArcGIS Pro/Desktop.
 
+## Development
+
+Install development dependencies by running:
+
+```
+pip install -e ".[dev]"
+```
+
 ## Releasing
 
 There is a `cut_release.py` CLI to bump and package releases.
 
-1. Install the CLI dependencies
-   `pip install -r requirements.dev.txt`
 1. Cut a release with the CLI
    `python cut_release.py minor`
    - To see the full options of the CLI use `python cut_release.py --help
@@ -39,7 +45,6 @@ There is a `cut_release.py` CLI to bump and package releases.
 ## Testing
 
 1. install a local editable module
-   - `pip install -e ".[tests]"`
    - `pip install -e .` to install without the testing dependencies
 1. run the tests with code coverage. (viewable in vscode with [coverage gutters](https://github.com/ryanluker/vscode-coverage-gutters))
    - `pytest`
