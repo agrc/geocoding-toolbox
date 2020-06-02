@@ -161,7 +161,7 @@ def execute(
 
     output_table = os.path.join(output_directory, 'geocoding_results_{}.csv'.format(UNIQUE_RUN))
 
-    with open(output_table, 'w+') as result_file:
+    with open(output_table, 'wb') as result_file:
         writer = csv.writer(result_file)
 
         writer.writerow(HEADER)
