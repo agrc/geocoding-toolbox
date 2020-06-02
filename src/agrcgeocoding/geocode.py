@@ -26,7 +26,8 @@ VERSION_CHECK_URL = 'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}
 VERSION_KEY = 'VERSION_NUMBER'
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
-SPACES = re.compile(r'(\s\d/\d\s)|/|(\s#.*)|%|(\.\s)|\?')
+SPACES = re.compile(' +')
+ALLOWABLE_CHARS = re.compile('[^a-zA-Z0-9]')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
 HOST = 'api.mapserv.utah.gov'
 HEADER = (
@@ -68,25 +69,11 @@ def _cleanse_street(data):
     """cleans up address garbage
     """
     replacement = ' '
-    street = str(data).strip()
 
+    #: & -> and
+    street = data.replace(chr(38), 'and')
+    street = ALLOWABLE_CHARS.sub(replacement, street)
     street = SPACES.sub(replacement, street)
-
-    for char in range(0, 31):
-        street = street.replace(chr(char), replacement)
-    for char in range(33, 37):
-        street = street.replace(chr(char), replacement)
-
-    street = street.replace(chr(38), 'and')
-
-    for char in range(39, 47):
-        street = street.replace(chr(char), replacement)
-    for char in range(58, 64):
-        street = street.replace(chr(char), replacement)
-    for char in range(91, 96):
-        street = street.replace(chr(char), replacement)
-    for char in range(123, 255):
-        street = street.replace(chr(char), replacement)
 
     return street.strip()
 
@@ -94,7 +81,8 @@ def _cleanse_street(data):
 def _cleanse_zone(data):
     """cleans up zone garbage
     """
-    zone = SPACES.sub(' ', str(data)).strip()
+    zone = ALLOWABLE_CHARS.sub(' ', str(data))
+    zone = SPACES.sub(' ', zone).strip()
 
     if len(zone) > 0 and zone[0] == '8':
         zone = zone.strip()[:5]
@@ -127,7 +115,7 @@ def execute(
     output_directory,
     spatial_reference=DEFAULT_SPATIAL_REFERENCE,
     locators=DEFAULT_LOCATOR_NAME,
-    add_message=print_function,
+    add_message=print,
     ignore_failures=False
 ):
     """Geocode an iterator of data.
@@ -140,6 +128,9 @@ def execute(
     add_message       = the function that log messages are sent to
     ignore_failure    = used to ignore the short-circut on multiple subsequent failures at the beginning of the job
     """
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     url_template = Template('https://{}/api/v1/geocode/$street/$zone'.format(HOST))
     sequential_fails = 0
     success = 0
@@ -221,7 +212,8 @@ def execute(
                 if request.status_code == 400:
                     #: fail fast with api key auth
                     raise InvalidAPIKeyException(stats['total'], primary_key, response['message'])
-                elif request.status_code != 200:
+
+                if request.status_code != 200:
                     sequential_fails += 1
 
                     write_error(primary_key, street, zone, response['message'])
@@ -234,6 +226,7 @@ def execute(
                 match_address = match['matchAddress']
                 standardized_address = match['standardizedAddress']
                 address_grid = match['addressGrid']
+                locator = match['locator']
 
                 match_x = location['x']
                 match_y = location['y']
@@ -244,8 +237,8 @@ def execute(
                 score += match_score
 
                 writer.writerow((
-                    primary_key, street, zone, match_score, match_address, standardized_address, address_grid, match_x,
-                    match_y, None
+                    primary_key, street, zone, match_x, match_y, match_score, locator, match_address,
+                    standardized_address, address_grid, None
                 ))
             except InvalidAPIKeyException as ex:
                 raise ex
