@@ -27,25 +27,21 @@ arcpy.agrcgeocoding.GeocodeTable('AGRC-99999999999999', r'C:\temp\tests\normal.c
 
 ## Development
 
-Install development dependencies by running:
-
-```
-pip install -e ".[dev]"
-```
-
-## Releasing
+### Releasing
 
 There is a `cut_release.py` CLI to bump and package releases.
 
+1. Install dependencies: `pip install -e ".[release]"`
 1. Cut a release with the CLI
    `python cut_release.py minor`
    - To see the full options of the CLI use `python cut_release.py --help
 1. Push the release commit to GitHub
    - `python cut_release.py publish`
 
-## Testing
+### Testing
 
 1. install a local editable module
+   - `pip install -e ".[tests]"`
    - `pip install -e .` to install without the testing dependencies
 1. run the tests with code coverage. (viewable in vscode with [coverage gutters](https://github.com/ryanluker/vscode-coverage-gutters))
    - `pytest`

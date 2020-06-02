@@ -44,9 +44,11 @@ setup(
     keywords=['geocoding', 'gis'],
     install_requires=['requests==2.23.*'],
     extras_require={
-        'dev': [
+        'release': [
             'docopt==0.6.*',
             'gitpython==3.1.*',
+        ],
+        'tests': [
             'pylint-quotes==0.2.*',
             'pylint==2.5.*',
             'pytest-cov==2.9.*',
