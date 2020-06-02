@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+"""
+setup.py
+A module that installs agrcgeocoding as a module
+"""
 import io
 import json
 import re
@@ -14,13 +18,15 @@ from setuptools import setup
 
 
 def read(*names, **kwargs):
-    with io.open(join(dirname(__file__), *names), encoding=kwargs.get('encoding', 'utf8')) as fh:
-        return fh.read()
+    """read the contents of a file
+    """
+    with io.open(join(dirname(__file__), *names), encoding=kwargs.get('encoding', 'utf8')) as file_handler:
+        return file_handler.read()
 
 
 setup(
     name='agrcgeocoding',
-    version=json.loads(read('tool-version.json'))['PRO_VERSION_NUMBER'],
+    version=json.loads(read('tool-version.json'))['VERSION_NUMBER'],
     license='MIT',
     description='Geocoding with the AGRC Web API.',
     author='AGRC',
@@ -41,20 +47,21 @@ setup(
         'Issue Tracker': 'https://github.com/agrc/geocoding-toolbox/issues',
     },
     keywords=['geocoding', 'gis'],
-    install_requires=['requests==2.23.*', 'docopt==0.6.*', 'gitpython==3.1.*'],
+    install_requires=['requests==2.*', 'future==0.15.*'],
     extras_require={
         'tests': [
             'yapf==0.30.*',
-            'pylint==2.5.*',
-            'pylint-quotes==0.2.*',
-            'pytest==5.4.*',
+            'pylint==1.9.*',
+            'pylint-quotes==0.1.*',
+            'pytest==4.6.*',
             'pytest-cov==2.9.*',
             'pytest-instafail==0.4.*',
             'pytest-isort==1.0.*',
-            'pytest-pylint==0.17.*',
+            'pytest-pylint==0.14.*',
             'pytest-watch==4.2.*',
             'requests-mock==1.8.*',
-        ]
+        ],
+        'release': ['docopt==0.6.*', 'gitpython==2.1.*']
     },
     setup_requires=[
         'pytest-runner',
