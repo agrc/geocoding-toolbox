@@ -12,6 +12,13 @@ This tool uses the python requests package that was bundled into ArcGIS Pro at v
 
 You can install requests into your ArcGIS Pro conda environment if you cannot upgrade to version 1.3 or greater.
 
+This toolbox can be imported via `arcpy` just like any other custom toolbox:
+
+```py
+arcpy.ImportToolbox(r'<path to folder>\AGRC Geocode Tools.pyt')
+arcpy.agrcgeocoding.GeocodeTable('AGRC-99999999999999', r'C:\temp\tests\normal.csv', 'id', 'street', 'zone', r'C:\temp')
+```
+
 ## Installation
 
 1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new "Server" API key using your external ip address.
