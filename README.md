@@ -22,6 +22,7 @@ arcpy.agrcgeocoding.GeocodeTable('AGRC-99999999999999', r'C:\temp\tests\normal.c
 ## Installation
 
 1. Sign up for an [AGRC Web API account](https://developer.mapserv.utah.gov) and create a new "Server" API key using your external ip address.
+1. Download the [release zip file](https://github.com/agrc/geocoding-toolbox/raw/master/tool/AGRC%20Geocode%20Tools.zip) for ArcGIS Pro. Check out the [`py-2` branch](https://github.com/agrc/geocoding-toolbox/raw/py-2/tool/AGRC%20Geocode%20Tools.zip) for the ArcGIS Desktop version.
 1. Unzip the contents of `AGRC Geocode Tools.zip` to a directory on your computer and open the associated python toolbox in ArcGIS Pro/Desktop.
 
 ## Development
