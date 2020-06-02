@@ -34,7 +34,6 @@ HEADER = (
     'primary_key', 'input_street', 'input_zone', 'x', 'y', 'score', 'locator', 'matchAddress', 'standardizedAddress',
     'addressGrid', 'message'
 )
-UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 HEALTH_PROBE_COUNT = 25
 
 
@@ -137,6 +136,7 @@ def execute(
     stats = {'fail': 0, 'total': 0}
     score = 0
     local_version = get_local_version()
+    UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 
     add_message('api_key: {}'.format(api_key))
     add_message('output_directory: {}'.format(output_directory))
