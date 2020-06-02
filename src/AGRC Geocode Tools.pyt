@@ -14,8 +14,7 @@ except ImportError:
     from agrcgeocoding import geocode
 
     #: to force refresh of the module in ArcGIS Pro - for development only
-    import importlib  # isort:skip
-    importlib.reload(geocode)
+    reload(geocode)
 
 LOCATORS = {
     'Address points and road centerlines': 'all',
