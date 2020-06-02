@@ -30,7 +30,7 @@ class Toolbox():
 
     def __init__(self):
         self.label = 'AGRC Geocoding Tools'
-        self.alias = ''
+        self.alias = 'agrcgeocoding'
 
         self.tools = [GeocodeTable]
 
