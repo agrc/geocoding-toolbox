@@ -1,9 +1,16 @@
 {
   "cSpell.words": [
-    "AGRC",
+    "agrc",
+    "agrcgeocoding",
     "arcpy",
+    "conda",
+    "docopt",
+    "geocode",
+    "gitpython",
+    "instafail",
     "isort",
     "pylint",
+    "pytest",
     "strftime",
     "wkid",
     "yapf"
@@ -16,5 +23,7 @@
   "python.linting.pycodestyleEnabled": false,
   "python.linting.pylintEnabled": true,
   "python.pythonPath": "C:\\Python27\\ArcGIS10.7\\python.exe",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "coverage-gutters.coverageFileNames": ["cov.xml"],
+  "editor.rulers": [120]
 }
