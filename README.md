@@ -34,7 +34,7 @@ There is a `cut_release.py` CLI to bump and package releases.
 1. Install dependencies: `pip install -e ".[release]"`
 1. Cut a release with the CLI
    `python cut_release.py minor`
-   - To see the full options of the CLI use `python cut_release.py --help
+   - To see the full options of the CLI use `python cut_release.py --help`
 1. Push the release commit to GitHub
    - `python cut_release.py publish`
 
