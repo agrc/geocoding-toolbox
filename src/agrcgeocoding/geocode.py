@@ -178,7 +178,7 @@ def execute(
             fail += 1
             total += 1
 
-            add_message(f'Failure on row: {primary_key} with {street}, {zone}\n{error_message}')
+            add_message(f'Failure on row: {primary_key} with {street}, {zone} \n{error_message}')
 
         for primary_key, street, zone in rows:
             if not ignore_failures and total == HEALTH_PROBE_COUNT and sequential_fails == HEALTH_PROBE_COUNT:
@@ -293,8 +293,8 @@ class InvalidAPIKeyException(Exception):
     def __init__(self, total, primary_key, message):
         self.total = total
         self.primary_key = primary_key
-        self.message = f'\n\nError returned for primary_key: {primary_key}\n' \
-            f'API response message: {message}\nTotal rows processed: {total}'
+        self.message = f'\n\nError returned for primary_key: {primary_key} \n' \
+            f'API response message: {message} \nTotal rows processed: {total}'
         super().__init__(self.message)
 
 
