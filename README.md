@@ -1,5 +1,7 @@
 # AGRC Geocoding Toolbox
 
+[![Build Status](https://travis-ci.com/agrc/geocoding-toolbox.svg?branch=master)](https://travis-ci.com/agrc/geocoding-toolbox) [![Coverage Status](https://coveralls.io/repos/github/agrc/geocoding-toolbox/badge.svg?branch=master)](https://coveralls.io/github/agrc/geocoding-toolbox?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This custom toolbox created by the AGRC allows ArcGIS users to geocode a table of addresses. The geocoding tool makes use of the [AGRC Web API](https://api.mapserv.utah.gov/#geocoding) to perform the geocoding. A complimentary [API key](https://developer.mapserv.utah.gov/secure/Home) will need to be obtained to run the tool.
 
 After the tool has completed, you will find a `.csv` with the input unique identifier field, the input address information, and the match results as fields.
