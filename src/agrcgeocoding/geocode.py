@@ -265,7 +265,6 @@ def get_local_version(temp_dir=Path(__file__).resolve()):
     while not tool_version.exists() and i < levels:
         parent_folder = parent_folder.parent
         tool_version = parent_folder / VERSION_JSON_FILE
-        print(tool_version)
         i += 1
 
     if not tool_version.exists():
