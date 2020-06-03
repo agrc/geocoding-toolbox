@@ -10,3 +10,7 @@ script:
 after_success:
   - pip install coveralls
   - coveralls
+notifications:
+    email:
+        on_success: change
+        on_failure: change
