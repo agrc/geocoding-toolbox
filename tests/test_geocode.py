@@ -59,6 +59,9 @@ def test_get_local_returns_null_3_levels_up(tmpdir):
     assert geocode.get_local_version(src) is None
 
 
+def test_get_local_finds_version_on_network_share():
+    assert 0
+
 def test_get_local_finds_version_from_sibling(tmpdir):
     version = Path(tmpdir) / 'tool-version.json'
     version.touch()
