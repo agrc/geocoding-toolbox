@@ -221,9 +221,12 @@ def execute(
                 match_score = match['score']
                 location = match['location']
                 match_address = match['matchAddress']
-                standardized_address = match['standardizedAddress']
                 address_grid = match['addressGrid']
                 locator = match['locator']
+                standardized_address = match['inputAddress']
+
+                if 'standardizedAddress' in match:
+                    standardized_address = match['standardizedAddress']
 
                 match_x = location['x']
                 match_y = location['y']
