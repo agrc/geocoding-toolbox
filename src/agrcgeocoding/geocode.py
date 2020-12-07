@@ -162,7 +162,7 @@ def execute(
 
     output_table = output_directory / f'geocoding_results_{UNIQUE_RUN}.csv'
 
-    with open(output_table, 'w+', newline='') as result_file:
+    with open(output_table, 'w+', newline='', encoding='utf-8') as result_file:
         writer = csv.writer(result_file)
 
         writer.writerow(HEADER)
