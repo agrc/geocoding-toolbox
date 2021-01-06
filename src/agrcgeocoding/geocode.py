@@ -282,7 +282,7 @@ def get_local_version(temp_dir=Path(__file__).resolve()):
 def get_remote_version():
     """Get the version number of the most recent code from the web
     """
-    response = requests.get(VERSION_CHECK_URL)
+    response = requests.get(VERSION_CHECK_URL, timeout=5)
     response_json = response.json()
 
     return response_json[VERSION_KEY]
