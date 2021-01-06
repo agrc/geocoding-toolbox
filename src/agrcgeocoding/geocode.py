@@ -305,7 +305,7 @@ def get_local_version(parent_folder=os.path.abspath(os.path.dirname(__file__))):
 def get_remote_version():
     """Get the version number of the most recent code from the web
     """
-    response = requests.get(VERSION_CHECK_URL)
+    response = requests.get(VERSION_CHECK_URL, timeout=5)
     response_json = response.json()
 
     return response_json[VERSION_KEY]
