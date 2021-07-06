@@ -24,6 +24,8 @@ VERSION_CHECK_URL = 'https://raw.githubusercontent.com/agrc/geocoding-toolbox/{}
 VERSION_KEY = 'PRO_VERSION_NUMBER'
 DEFAULT_SPATIAL_REFERENCE = 26912
 DEFAULT_LOCATOR_NAME = 'all'
+DEFAULT_POBOX = 'false'
+DEFAULT_ACCEPT_SCORE = 70
 SPACES = re.compile(' +')
 ALLOWABLE_CHARS = re.compile('[^a-zA-Z0-9]')
 RATE_LIMIT_SECONDS = (0.015, 0.03)
@@ -113,6 +115,8 @@ def execute(
     output_directory,
     spatial_reference=DEFAULT_SPATIAL_REFERENCE,
     locators=DEFAULT_LOCATOR_NAME,
+    pobox=DEFAULT_POBOX,
+    acceptScore=DEFAULT_ACCEPT_SCORE,
     add_message=print,
     ignore_failures=False
 ):
@@ -140,6 +144,8 @@ def execute(
     add_message(f'output_directory: {output_directory}')
     add_message(f'spatial_reference: {spatial_reference}')
     add_message(f'locators: {locators}')
+    add_message(f'pobox: {pobox}')
+    add_message(f'acceptScore: {acceptScore}')
     add_message(f'ignore_failures: {ignore_failures}')
 
     def log_status():
@@ -195,7 +201,9 @@ def execute(
                     params={
                         'apiKey': api_key,
                         'spatialReference': spatial_reference,
-                        'locators': locators
+                        'locators': locators,
+                        'pobox': pobox,
+                        'acceptScore': acceptScore
                     }
                 )
 
@@ -321,6 +329,8 @@ if __name__ == '__main__':
     parser.add_argument('output', type=str)
     parser.add_argument('--wkid', default=26912, type=int, action='store')
     parser.add_argument('--locators', default='all', type=str, action='store')
+    parser.add_argument('--pobox', default='false', type=str, action='store')
+    parser.add_argument('--acceptScore', default='70', type=int, action='store')
     parser.add_argument('--ignore-failures', action='store_true')
 
     args = parser.parse_args()
@@ -339,6 +349,8 @@ if __name__ == '__main__':
         args.output,
         spatial_reference=args.wkid,
         locators=args.locators,
+        pobox=args.pobox,
+        acceptScore=args.acceptScore,
         add_message=print,
         ignore_failures=args.ignore_failures
     )
