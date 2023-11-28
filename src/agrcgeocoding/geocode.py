@@ -34,7 +34,6 @@ HEADER = (
     'primary_key', 'input_street', 'input_zone', 'x', 'y', 'score', 'locator', 'matchAddress', 'standardizedAddress',
     'addressGrid', 'message'
 )
-UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
 HEALTH_PROBE_COUNT = 25
 
 
@@ -166,6 +165,7 @@ def execute(
     #: convert strings to path objects
     output_directory = Path(output_directory)
 
+    UNIQUE_RUN = time.strftime('%Y%m%d%H%M%S')
     output_table = output_directory / f'geocoding_results_{UNIQUE_RUN}.csv'
 
     with open(output_table, 'w+', newline='', encoding='utf-8') as result_file:
