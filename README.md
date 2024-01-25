@@ -1,3 +1,5 @@
+# This project has been deprecated. See [this blog post](https://gis.utah.gov/the-gecoding-toolbox-is-being-deprecated/) for more information.
+
 # UGRC Geocoding Toolbox
 
 [![Build Status](https://travis-ci.com/agrc/geocoding-toolbox.svg?branch=master)](https://travis-ci.com/agrc/geocoding-toolbox) [![Coverage Status](https://coveralls.io/repos/github/agrc/geocoding-toolbox/badge.svg?branch=master)](https://coveralls.io/github/agrc/geocoding-toolbox?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
